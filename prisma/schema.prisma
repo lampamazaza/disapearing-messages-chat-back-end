@@ -7,30 +7,30 @@ generator client {
 
 datasource db {
     provider = "sqlite"
-    url      = "file:./dev.db"
+    url      = "file:./dev.sqlite"
 }
 
-model User {
-    id        Int    @id @default(autoincrement())
-    publicKey String @unique
+model UserModel {
+    id        Int         @id @default(autoincrement())
+    publicKey String      @unique
     name      String
-    alias     String @unique
-    chats     Chat[]
+    alias     String      @unique
+    chats     ChatModel[]
 }
 
-model Message {
-    id     Int    @id @default(autoincrement())
+model MessageModel {
+    id     Int       @id @default(autoincrement())
     sender String
     text   String
     sentAt String
-    chat   Chat   @relation(fields: [chatId], references: [id])
+    chat   ChatModel @relation(fields: [chatId], references: [id])
     chatId Int
 }
 
-model Chat {
-    id            Int       @id @default(autoincrement())
-    chatHash      String    @unique
+model ChatModel {
+    id            Int            @id @default(autoincrement())
+    chatHash      String         @unique
     lastMessageId Int
-    Users         User[]
-    Message       Message[]
+    Users         UserModel[]
+    Message       MessageModel[]
 }

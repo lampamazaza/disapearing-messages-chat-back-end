@@ -10,6 +10,7 @@ import cors from "cors";
 import { IConfigService } from "./config/config.service.interface";
 import { IExeptionFilter } from "./errors/exeption.filter.interface";
 import { UserController } from "./users/users.controller";
+import { ChatController } from "./chats/chats.controller";
 import { PrismaService } from "./database/prisma.service";
 import { AuthMiddleware } from "./common/auth.middleware";
 
@@ -39,6 +40,7 @@ export class App {
 
   useRoutes(): void {
     this.app.use("/users", this.userController.router);
+    this.app.use("/chats", this.chatController.router);
   }
 
   useExeptionFilters(): void {

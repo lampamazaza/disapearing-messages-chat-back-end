@@ -1,24 +1,29 @@
+import { UserModel, MessageModel } from "@prisma/client";
+
 export class Chat {
   constructor(
     private readonly _id: string,
     private readonly _chatHash: string,
-    private readonly _lastMessageId: string
-    private readonly _users: string
-    private readonly _Message: string
+    private readonly _lastMessage: MessageModel,
+    private readonly _correspondent: UserModel
   ) {
-    this._publicKey = _publicKey;
-    this._name = _name;
-    this._alias = _alias;
+    this._id = _id;
+    this._chatHash = _chatHash;
+    this._lastMessage = _lastMessage;
+    this._correspondent = _correspondent;
   }
 
   get name(): string {
-    return this._name;
+    return this._id;
   }
-  get publicKey(): string {
-    return this._publicKey;
+  get chatHash(): string {
+    return this._chatHash;
   }
-  get alias(): string {
-    return this._alias;
+  get lastMessage(): MessageModel {
+    return this._lastMessage;
+  }
+  get correspondent(): UserModel {
+    return this._correspondent;
   }
 }
 

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 
 export interface IChatController {
-  get: (req: Request, res: Response, next: NextFunction) => void;
+  getChatsByUser: (req: Request, res: Response, next: NextFunction) => void;
 }

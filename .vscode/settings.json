@@ -1,0 +1,11 @@
+{
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "database": "${workspaceFolder:disapearing-messages-chat-back-end}/prisma/dev.sqlite",
+      "name": "admin"
+    }
+  ],
+  "sqltools.useNodeRuntime": true
+}

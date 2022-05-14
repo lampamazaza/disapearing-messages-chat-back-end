@@ -10,40 +10,51 @@ import { UserCreateDto } from "./dto/user-create.dto";
 import { ValidateMiddleware } from "../common/validate.middleware";
 import { sign } from "jsonwebtoken";
 import { IConfigService } from "../config/config.service.interface";
-import { IUserService } from "./users.service.interface";
+import { IChatService } from "./chats.service.interface";
 import { AuthGuard } from "../common/auth.guard";
 
 @injectable()
 export class ChatController extends BaseController implements IChatController {
   constructor(
     @inject(TYPES.ILogger) private loggerService: ILogger,
-    @inject(TYPES.UserService) private userService: IUserService,
+    @inject(TYPES.ChatService) private chatsService: IChatService,
     @inject(TYPES.ConfigService) private configService: IConfigService
   ) {
     super(loggerService);
     this.bindRoutes([
       {
-        path: "/",
+        path: "/chatsByUserId/:userid",
         method: "get",
-        func: this.get,
-        middlewares: [new AuthGuard()],
+        func: this.getChatsByUser,
+        // middlewares: [new AuthGuard()],
+      },
+      {
+        path: "/:chatId",
+        method: "get",
+        func: this.getChatById,
+        // middlewares: [new AuthGuard()],
       },
     ]);
   }
 
-  async get(
-    { params: { user } }: Request,
+  async getChatsByUser(
+    { params: { userid } }: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const userInfo = await this.userService.getUserInfo(user);
-    if (!userInfo) {
-      return next(new HTTPError(404, "User not found"));
+    const userChats = await this.chatsService.getUserChats(+userid);
+    this.ok(res, userChats);
+  }
+
+  async getChatById(
+    { params: { chatId } }: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    const chat = await this.chatsService.getChatById(+chatId);
+    if (!chat) {
+      return next(new HTTPError(404, "Chat not found"));
     }
-    this.ok(res, {
-      publicKey: userInfo?.publicKey,
-      alias: userInfo?.alias,
-      name: userInfo?.name,
-    });
+    this.ok(res, chat);
   }
 }

@@ -11,11 +11,28 @@ datasource db {
 }
 
 model UserModel {
-    id        Int         @id @default(autoincrement())
-    publicKey String      @unique
+    id        Int            @id @default(autoincrement())
+    publicKey String         @unique
     name      String
-    alias     String      @unique
-    chats     ChatModel[]
+    alias     String         @unique
+    chats     UsersOnChats[]
+}
+
+model ChatModel {
+    id            Int            @id @default(autoincrement())
+    chatHash      String         @unique
+    lastMessageId Int
+    users         UsersOnChats[]
+    messages      MessageModel[]
+}
+
+model UsersOnChats {
+    post   UserModel @relation(fields: [userId], references: [id])
+    userId Int // relation scalar field (used in the `@relation` attribute above)
+    chat   ChatModel @relation(fields: [chatId], references: [id])
+    chatId Int // relation scalar field (used in the `@relation` attribute above)
+
+    @@id([userId, chatId])
 }
 
 model MessageModel {
@@ -25,12 +42,4 @@ model MessageModel {
     sentAt String
     chat   ChatModel @relation(fields: [chatId], references: [id])
     chatId Int
-}
-
-model ChatModel {
-    id            Int            @id @default(autoincrement())
-    chatHash      String         @unique
-    lastMessageId Int
-    Users         UserModel[]
-    Message       MessageModel[]
 }

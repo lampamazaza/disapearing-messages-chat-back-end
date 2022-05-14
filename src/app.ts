@@ -23,6 +23,7 @@ export class App {
   constructor(
     @inject(TYPES.ILogger) private logger: ILogger,
     @inject(TYPES.UserController) private userController: UserController,
+    @inject(TYPES.ChatController) private chatController: ChatController,
     @inject(TYPES.ExeptionFilter) private exeptionFilter: IExeptionFilter,
     @inject(TYPES.ConfigService) private configService: IConfigService,
     @inject(TYPES.PrismaService) private prismaService: PrismaService

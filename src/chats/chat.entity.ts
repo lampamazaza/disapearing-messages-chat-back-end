@@ -1,11 +1,11 @@
-import { UserModel, MessageModel } from "@prisma/client";
-
+import { MessageModel } from "@prisma/client";
+import { User } from "../users/user.entity";
 export class Chat {
   constructor(
     private readonly _id: string,
     private readonly _chatHash: string,
     private readonly _lastMessage: MessageModel,
-    private readonly _correspondent: UserModel
+    private readonly _correspondent: User
   ) {
     this._id = _id;
     this._chatHash = _chatHash;
@@ -22,7 +22,7 @@ export class Chat {
   get lastMessage(): MessageModel {
     return this._lastMessage;
   }
-  get correspondent(): UserModel {
+  get correspondent(): User {
     return this._correspondent;
   }
 }

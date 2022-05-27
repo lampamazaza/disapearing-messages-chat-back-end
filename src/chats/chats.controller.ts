@@ -6,7 +6,7 @@ import { ILogger } from "../logger/logger.interface";
 import { TYPES } from "../types";
 import "reflect-metadata";
 import { IChatController } from "./chats.controller.interface";
-import { UserCreateDto } from "./dto/user-create.dto";
+import { UserCreateDto } from "./dto/chat-create.dto";
 import { ValidateMiddleware } from "../common/validate.middleware";
 import { sign } from "jsonwebtoken";
 import { IConfigService } from "../config/config.service.interface";
@@ -38,11 +38,11 @@ export class ChatController extends BaseController implements IChatController {
   }
 
   async getChatsByUser(
-    { params: { userid } }: Request,
+    { params: { userPublicKey } }: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const userChats = await this.chatsService.getUserChats(+userid);
+    const userChats = await this.chatsService.getUserChats(userPublicKey);
     this.ok(res, userChats);
   }
 

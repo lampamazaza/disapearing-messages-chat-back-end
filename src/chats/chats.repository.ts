@@ -10,10 +10,10 @@ export class ChatsRepository implements IChatsRepository {
     @inject(TYPES.PrismaService) private prismaService: PrismaService
   ) {}
 
-  async getUserChats(id: number): Promise<ChatModel[]> {
+  async getUserChats(userPublicKey: string): Promise<ChatModel[]> {
     const chats = await this.prismaService.client.usersOnChats.findMany({
       where: {
-        userId: id,
+        userPublicKey,
       },
       include: {
         chat: true,

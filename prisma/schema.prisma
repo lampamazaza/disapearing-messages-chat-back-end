@@ -13,33 +13,32 @@ datasource db {
 model UserModel {
     id        Int            @id @default(autoincrement())
     publicKey String         @unique
-    name      String
-    alias     String         @unique
+    name      String?
+    alias     String?        @unique
     chats     UsersOnChats[]
 }
 
 model ChatModel {
-    id            Int            @id @default(autoincrement())
-    chatHash      String         @unique
-    lastMessageId Int
-    users         UsersOnChats[]
-    messages      MessageModel[]
+    id       Int            @id @default(autoincrement())
+    chatHash String         @unique
+    users    UsersOnChats[]
+    messages MessageModel[]
 }
 
 model UsersOnChats {
-    post   UserModel @relation(fields: [userId], references: [id])
-    userId Int // relation scalar field (used in the `@relation` attribute above)
-    chat   ChatModel @relation(fields: [chatId], references: [id])
-    chatId Int // relation scalar field (used in the `@relation` attribute above)
+    user          UserModel @relation(fields: [userPublicKey], references: [publicKey])
+    userPublicKey String // relation scalar field (used in the `@relation` attribute above)
+    chat          ChatModel @relation(fields: [chatId], references: [id])
+    chatId        Int // relation scalar field (used in the `@relation` attribute above)
 
-    @@id([userId, chatId])
+    @@id([userPublicKey, chatId])
 }
 
 model MessageModel {
     id     Int       @id @default(autoincrement())
     sender String
     text   String
-    sentAt String
+    sentAt DateTime  @default(now())
     chat   ChatModel @relation(fields: [chatId], references: [id])
     chatId Int
 }

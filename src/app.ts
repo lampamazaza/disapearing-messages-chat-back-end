@@ -11,6 +11,7 @@ import { IConfigService } from "./config/config.service.interface";
 import { IExeptionFilter } from "./errors/exeption.filter.interface";
 import { UserController } from "./users/users.controller";
 import { ChatController } from "./chats/chats.controller";
+import { MessageController } from "./messages/messages.controller";
 import { PrismaService } from "./database/prisma.service";
 import { AuthMiddleware } from "./common/auth.middleware";
 
@@ -24,6 +25,8 @@ export class App {
     @inject(TYPES.ILogger) private logger: ILogger,
     @inject(TYPES.UserController) private userController: UserController,
     @inject(TYPES.ChatController) private chatController: ChatController,
+    @inject(TYPES.MessageController)
+    private messageController: MessageController,
     @inject(TYPES.ExeptionFilter) private exeptionFilter: IExeptionFilter,
     @inject(TYPES.ConfigService) private configService: IConfigService,
     @inject(TYPES.PrismaService) private prismaService: PrismaService
@@ -42,6 +45,7 @@ export class App {
   useRoutes(): void {
     this.app.use("/users", this.userController.router);
     this.app.use("/chats", this.chatController.router);
+    this.app.use("/messages", this.messageController.router);
   }
 
   useExeptionFilters(): void {

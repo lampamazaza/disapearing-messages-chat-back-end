@@ -20,6 +20,12 @@ import { IChatService } from "./chats/chats.service.interface";
 import { ChatService } from "./chats/chats.service";
 import { IChatsRepository } from "./chats/chats.repository.interface";
 import { ChatsRepository } from "./chats/chats.repository";
+import { IMessageController } from "./messages/messages.controller.interface";
+import { MessageController } from "./messages/messages.controller";
+import { IMessageService } from "./messages/messages.service.interface";
+import { MessageService } from "./messages/messages.service";
+import { IMessagesRepository } from "./messages/messages.repository.interface";
+import { MessagesRepository } from "./messages/messages.repository";
 export interface IBootstrapReturn {
   appContainer: Container;
   app: App;
@@ -34,6 +40,11 @@ export const appBindings = new ContainerModule((bind: interfaces.Bind) => {
   bind<IChatService>(TYPES.ChatService).to(ChatService);
   bind<IChatsRepository>(TYPES.ChatsRepository)
     .to(ChatsRepository)
+    .inSingletonScope();
+  bind<IMessageController>(TYPES.MessageController).to(MessageController);
+  bind<IMessageService>(TYPES.MessageService).to(MessageService);
+  bind<IMessagesRepository>(TYPES.MessagesRepository)
+    .to(MessagesRepository)
     .inSingletonScope();
   bind<PrismaService>(TYPES.PrismaService).to(PrismaService).inSingletonScope();
   bind<IConfigService>(TYPES.ConfigService)

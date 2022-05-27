@@ -10,4 +10,8 @@ export const TYPES = {
   ExeptionFilter: Symbol.for("ExeptionFilter"),
   ConfigService: Symbol.for("ConfigService"),
   PrismaService: Symbol.for("PrismaService"),
+
+  MessageController: Symbol.for("MessageController"),
+  MessagesRepository: Symbol.for("MessagesRepository"),
+  MessageService: Symbol.for("MessageService"),
 };

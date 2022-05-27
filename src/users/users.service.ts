@@ -22,7 +22,6 @@ export class UserService implements IUserService {
   }: UserCreateDto): Promise<UserModel | null> {
     const newUser = new User(publicKey, name, alias);
     const existedUser = await this.usersRepository.find(publicKey);
-    console.log(existedUser);
     if (existedUser) {
       return null;
     }

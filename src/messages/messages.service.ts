@@ -2,7 +2,6 @@ import { MessageModel } from ".prisma/client";
 import { inject, injectable } from "inversify";
 import { IConfigService } from "../config/config.service.interface";
 import { TYPES } from "../types";
-// import { UserLoginDto } from "./dto/user-login.dto";
 import { MessageCreateDto } from "./dto/message-create.dto";
 import { Message } from "./message.entity";
 import { IMessagesRepository } from "./messages.repository.interface";
@@ -16,13 +15,29 @@ export class MessageService implements IMessageService {
     private messagesRepository: IMessagesRepository
   ) {}
 
-  async create(message: MessageCreateDto): Promise<any> {
+  async create(message: MessageCreateDto): Promise<Message | null> {
     const newMessage = new Message(
       message.toPublicKey,
       message.chatId,
       message.from,
       message.message
     );
-    return this.messagesRepository.create(newMessage);
+
+    try {
+      await this.messagesRepository.create(newMessage);
+      return newMessage;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getMessagesByCorrespondentPublicKey(
+    userPublicKey: string,
+    correspondentPublickKey: string
+  ): Promise<MessageModel[]> {
+    return this.messagesRepository.getMessagesByCorrespondentPublicKey(
+      userPublicKey,
+      correspondentPublickKey
+    );
   }
 }

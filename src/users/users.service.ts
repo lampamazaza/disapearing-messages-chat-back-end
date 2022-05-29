@@ -28,6 +28,15 @@ export class UserService implements IUserService {
     return this.usersRepository.create(newUser);
   }
 
+  async updateUserInfo(
+    { name, alias }: UserCreateDto,
+    userPublicKey: string
+  ): Promise<User | null> {
+    const newUser = new User(userPublicKey, name, alias);
+    await this.usersRepository.update(newUser);
+    return newUser;
+  }
+
   async validateUser(): Promise<boolean> {
     // const existedUser = await this.usersRepository.find(email);
     // if (!existedUser) {

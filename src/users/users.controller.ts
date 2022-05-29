@@ -39,7 +39,34 @@ export class UserController extends BaseController implements IUserController {
         func: this.info,
         // middlewares: [new AuthGuard()],
       },
+      {
+        path: "/:userPublicKeyToUpdate",
+        method: "put",
+        func: this.updateUser,
+        // middlewares: [new AuthGuard()],
+      },
+      {
+        path: "/:user",
+        method: "get",
+        func: this.info,
+        // middlewares: [new AuthGuard()],
+      },
     ]);
+  }
+
+  async updateUser(
+    { params: { userPublicKeyToUpdate }, userPublicKey, body }: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    if (userPublicKeyToUpdate !== userPublicKey) {
+      return next(new HTTPError(403, "You can't change other people account"));
+    }
+    const updatedUserInfo = await this.userService.updateUserInfo(
+      body,
+      userPublicKey
+    );
+    this.ok(res, updatedUserInfo);
   }
 
   async login(
@@ -52,7 +79,7 @@ export class UserController extends BaseController implements IUserController {
     //   return next(new HTTPError(401, "Auth error", "login"));
     // }
     // const jwt = await this.signJWT(
-    //   req.body.email,
+    //   req.body.publicKey,
     //   this.configService.get("SECRET")
     // );
     this.ok(res, { jwt: "jwt" });

@@ -8,7 +8,7 @@ export class PrismaService {
   client: PrismaClient;
 
   constructor(@inject(TYPES.ILogger) private logger: ILogger) {
-    this.client = new PrismaClient({ log: ["query", "info", "warn", "error"] });
+    this.client = new PrismaClient();
   }
 
   async connect(): Promise<void> {

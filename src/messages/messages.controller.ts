@@ -9,6 +9,7 @@ import { IMessageController } from "./messages.controller.interface";
 import { IConfigService } from "../config/config.service.interface";
 import { IMessageService } from "./messages.service.interface";
 import { ValidateMiddleware } from "../common/validate.middleware";
+import { HTTPError } from "../errors/http-error.class";
 
 @injectable()
 export class MessageController
@@ -28,12 +29,12 @@ export class MessageController
         func: this.sendMessage,
         middlewares: [new ValidateMiddleware(MessageCreateDto)],
       },
-      // {
-      //   path: "/",
-      //   method: "get",
-      //   // func: this.getMessagesByUser,
-      //   // middlewares: [new AuthGuard()],
-      // },
+      {
+        path: "/:correspondentPublickKey",
+        method: "get",
+        func: this.getMessagesByChat,
+        // middlewares: [new AuthGuard()],
+      },
       // {
       //   path: "/subscribe",
       //   method: "post",
@@ -41,6 +42,28 @@ export class MessageController
       //   // middlewares: [new AuthGuard()],
       // },
     ]);
+  }
+
+  async getMessagesByChat(
+    { userPublicKey, params: { correspondentPublickKey } }: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    const messages =
+      await this.messagesService.getMessagesByCorrespondentPublicKey(
+        userPublicKey,
+        correspondentPublickKey
+      );
+
+    if (!messages) {
+      return next(
+        new HTTPError(
+          404,
+          "There are no messages in this chat, or chat doesn't exist"
+        )
+      );
+    }
+    this.ok(res, messages);
   }
 
   async sendMessage(

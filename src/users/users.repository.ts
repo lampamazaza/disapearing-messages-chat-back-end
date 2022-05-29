@@ -28,4 +28,16 @@ export class UsersRepository implements IUsersRepository {
       },
     });
   }
+
+  async update(user: User): Promise<UserModel> {
+    return this.prismaService.client.userModel.update({
+      where: {
+        publicKey: user.publicKey,
+      },
+      data: {
+        name: user.name,
+        alias: user.alias,
+      },
+    });
+  }
 }

@@ -1,26 +1,13 @@
 export class Message {
   constructor(
-    private readonly _to: string,
-    private readonly _chatId: number | null,
-    private readonly _from: string,
-    private readonly _message: string
+    readonly to: string,
+    readonly chatId: number | null,
+    readonly from: string,
+    readonly message: string
   ) {
-    this._to = _to;
-    this._chatId = _chatId;
-    this._from = _from;
-    this._message = _message;
-  }
-
-  get to(): string {
-    return this._to;
-  }
-  get message(): string {
-    return this._message;
-  }
-  get chatId(): number | null {
-    return this._chatId;
-  }
-  get from(): string {
-    return this._from;
+    this.to = to;
+    this.chatId = chatId;
+    this.from = from;
+    this.message = message;
   }
 }

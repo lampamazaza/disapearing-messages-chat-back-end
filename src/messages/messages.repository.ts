@@ -5,6 +5,7 @@ import { PrismaService } from "../database/prisma.service";
 import { TYPES } from "../types";
 import { IMessagesRepository } from "./messages.repository.interface";
 import generateHash from "../utils/generateHash";
+
 @injectable()
 export class MessagesRepository implements IMessagesRepository {
   constructor(
@@ -27,7 +28,7 @@ export class MessagesRepository implements IMessagesRepository {
     }
 
     if (chat === null) {
-      hash = await generateHash(from + to);
+      hash = await generateHash(from, to);
       chat = await this.prismaService.client.chatModel.findFirst({
         where: { chatHash: hash },
       });
@@ -35,21 +36,6 @@ export class MessagesRepository implements IMessagesRepository {
 
     if (chat === null) {
       chatExists = false;
-    }
-
-    if (chatExists) {
-      const usersIds = await this.prismaService.client.usersOnChats.findMany({
-        where: { chatId: chat.id },
-      });
-
-      const userMaps = {
-        [usersIds[0].userPublicKey]: true,
-        [usersIds[1].userPublicKey]: true,
-      };
-
-      if (!userMaps[from] || !userMaps[to]) {
-        throw new Error("You are not a participant of this chat");
-      }
     }
 
     if (!chatExists) {
@@ -85,6 +71,26 @@ export class MessagesRepository implements IMessagesRepository {
           },
         },
       },
+    });
+  }
+
+  async getMessagesByCorrespondentPublicKey(
+    userPublicKey: string,
+    correspondentPublickKey: string
+  ): Promise<MessageModel[]> {
+    const chatHash = await generateHash(userPublicKey, correspondentPublickKey);
+
+    const chat = await this.prismaService.client.chatModel.findFirst({
+      where: {
+        chatHash,
+      },
+    });
+
+    if (chat === null) return null;
+
+    return this.prismaService.client.messageModel.findMany({
+      where: { chatId: chat.id },
+      orderBy: { sentAt: "asc" },
     });
   }
 }

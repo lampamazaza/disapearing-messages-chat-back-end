@@ -1,9 +1,11 @@
 // Computes the SHA-256 digest of a string with Web Crypto
 // Source: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
+const crypto = require("node:crypto").webcrypto;
 
-export default function sha256(str) {
-  // Get the string as arraybuffer.
-  var buffer = new TextEncoder().encode(str);
+export default function generateHash(strA, strB) {
+  const buffer = new TextEncoder().encode(
+    strA > strB ? strA + strB : strB + strA
+  );
   return crypto.subtle.digest("SHA-256", buffer).then(function (hash) {
     return hex(hash);
   });

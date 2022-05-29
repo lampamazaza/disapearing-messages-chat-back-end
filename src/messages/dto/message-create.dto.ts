@@ -4,7 +4,8 @@ export class MessageCreateDto {
   @IsString({ message: "Non valid public key" })
   toPublicKey: string;
 
-  @IsNumber({}, { message: "Non valid chat id" })
+  // @
+  // @IsNumber({}, { message: "Non valid chat id" })
   chatId: number;
 
   from: string;

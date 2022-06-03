@@ -37,19 +37,18 @@ export class UserService implements IUserService {
     return newUser;
   }
 
-  async validateUser(): Promise<boolean> {
-    // const existedUser = await this.usersRepository.find(email);
-    // if (!existedUser) {
-    //   return false;
-    // }
-    // const newUser = new User(
-    //   existedUser.email,
-    //   existedUser.name,
-    //   existedUser.password
-    // );
-    // return newUser.comparePassword(password);
-    return true;
-  }
+  // async validateUser(userPublicKey: string, nonce: string): Promise<boolean> {
+  //   const existedUser = await this.usersRepository.find(email);
+  //   if (!existedUser) {
+  //     return false;
+  //   }
+  //   const newUser = new User(
+  //     existedUser.email,
+  //     existedUser.name,
+  //     existedUser.password
+  //   );
+  //   return newUser.comparePassword(password);
+  // }
 
   async getUserInfo(publicKey: string): Promise<UserModel | null> {
     return this.usersRepository.find(publicKey);

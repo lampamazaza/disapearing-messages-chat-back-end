@@ -28,11 +28,11 @@ export class UserController extends BaseController implements IUserController {
         func: this.create,
         middlewares: [new ValidateMiddleware(UserCreateDto)],
       },
-      {
-        path: "/login",
-        method: "post",
-        func: this.login,
-      },
+      // {
+      //   path: "/login",
+      //   method: "post",
+      //   func: this.login,
+      // },
       {
         path: "/:user",
         method: "get",
@@ -45,12 +45,12 @@ export class UserController extends BaseController implements IUserController {
         func: this.updateUser,
         // middlewares: [new AuthGuard()],
       },
-      {
-        path: "/:user",
-        method: "get",
-        func: this.info,
-        // middlewares: [new AuthGuard()],
-      },
+      // {
+      //   path: "/:user",
+      //   method: "get",
+      //   func: this.info,
+      //   // middlewares: [new AuthGuard()],
+      // },
     ]);
   }
 
@@ -69,21 +69,21 @@ export class UserController extends BaseController implements IUserController {
     this.ok(res, updatedUserInfo);
   }
 
-  async login(
-    req: Request<{}, {}, {}>,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    // const result = await this.userService.validateUser(req.body);
-    // if (!result) {
-    //   return next(new HTTPError(401, "Auth error", "login"));
-    // }
-    // const jwt = await this.signJWT(
-    //   req.body.publicKey,
-    //   this.configService.get("SECRET")
-    // );
-    this.ok(res, { jwt: "jwt" });
-  }
+  // async login(
+  //   { body: { userPublicKey, nonce } }: Request<{}, {}, {}>,
+  //   res: Response,
+  //   next: NextFunction
+  // ): Promise<void> {
+  //   const result = await this.userService.validateUser(userPublicKey, nonce);
+  //   if (!result) {
+  //     return next(new HTTPError(401, "Auth error", "login"));
+  //   }
+  //   const jwt = await this.signJWT(
+  //     userPublicKey,
+  //     this.configService.get("SECRET")
+  //   );
+  //   this.ok(res, { jwt });
+  // }
 
   async create(
     { body }: Request<{}, {}, UserCreateDto>,
@@ -117,24 +117,24 @@ export class UserController extends BaseController implements IUserController {
     });
   }
 
-  private signJWT(email: string, secret: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      sign(
-        {
-          email,
-          iat: Math.floor(Date.now() / 1000),
-        },
-        secret,
-        {
-          algorithm: "HS256",
-        },
-        (err, token) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(token as string);
-        }
-      );
-    });
-  }
+  // private signJWT(publicKey: string, secret: string): Promise<string> {
+  //   return new Promise<string>((resolve, reject) => {
+  //     sign(
+  //       {
+  //         publicKey,
+  //         iat: Math.floor(Date.now() / 1000),
+  //       },
+  //       secret,
+  //       {
+  //         algorithm: "HS256",
+  //       },
+  //       (err, token) => {
+  //         if (err) {
+  //           reject(err);
+  //         }
+  //         resolve(token as string);
+  //       }
+  //     );
+  //   });
+  // }
 }

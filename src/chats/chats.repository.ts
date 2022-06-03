@@ -1,4 +1,4 @@
-import { ChatModel } from ".prisma/client";
+import { UsersOnChats, ChatModel, MessageModel } from ".prisma/client";
 import { inject, injectable } from "inversify";
 import { PrismaService } from "../database/prisma.service";
 import { TYPES } from "../types";
@@ -10,17 +10,31 @@ export class ChatsRepository implements IChatsRepository {
     @inject(TYPES.PrismaService) private prismaService: PrismaService
   ) {}
 
-  async getUserChats(userPublicKey: string): Promise<ChatModel[]> {
-    const chats = await this.prismaService.client.usersOnChats.findMany({
+  async getUserChats(
+    userPublicKey: string
+  ): Promise<UsersOnChats[] & { lastMessage: MessageModel }> {
+    let result;
+    let chats = await this.prismaService.client.usersOnChats.findMany({
       where: {
         userPublicKey,
       },
       include: {
-        chat: true,
+        user: true,
       },
     });
 
-    return chats.map(({ chat }) => chat);
+    result = Promise.all(
+      chats.map(async (item) => {
+        item["lastMessage"] =
+          await this.prismaService.client.messageModel.findFirst({
+            where: { chatId: item.chatId },
+            orderBy: { sentAt: "asc" },
+          });
+        return item;
+      })
+    );
+
+    return result;
   }
   async getChatById(id: number): Promise<ChatModel | null> {
     const chat = await this.prismaService.client.chatModel.findUnique({

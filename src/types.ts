@@ -14,4 +14,6 @@ export const TYPES = {
   MessageController: Symbol.for("MessageController"),
   MessagesRepository: Symbol.for("MessagesRepository"),
   MessageService: Symbol.for("MessageService"),
+
+  PollingSerivce: Symbol.for("PollingService"),
 };

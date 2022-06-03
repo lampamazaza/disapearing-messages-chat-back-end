@@ -10,6 +10,7 @@ import { IConfigService } from "../config/config.service.interface";
 import { IMessageService } from "./messages.service.interface";
 import { ValidateMiddleware } from "../common/validate.middleware";
 import { HTTPError } from "../errors/http-error.class";
+import { IPollingService } from "pollingService/polling.interface";
 
 @injectable()
 export class MessageController
@@ -19,7 +20,8 @@ export class MessageController
   constructor(
     @inject(TYPES.ILogger) private loggerService: ILogger,
     @inject(TYPES.MessageService) private messagesService: IMessageService,
-    @inject(TYPES.ConfigService) private configService: IConfigService
+    @inject(TYPES.ConfigService) private configService: IConfigService,
+    @inject(TYPES.PollingSerivce) private pollingService: IPollingService
   ) {
     super(loggerService);
     this.bindRoutes([
@@ -35,12 +37,12 @@ export class MessageController
         func: this.getMessagesByChat,
         // middlewares: [new AuthGuard()],
       },
-      // {
-      //   path: "/subscribe",
-      //   method: "post",
-      //   // func: this.getMessagesByUser,
-      //   // middlewares: [new AuthGuard()],
-      // },
+      {
+        path: "/subscribe",
+        method: "post",
+        func: this.subscribeForMessages,
+        // middlewares: [new AuthGuard()],
+      },
     ]);
   }
 
@@ -72,6 +74,19 @@ export class MessageController
     next: NextFunction
   ): Promise<void> {
     const message = await this.messagesService.create(body);
+    this.pollingService.publish(
+      message.to,
+      { [message.to]: message.chatId },
+      (oldData, newData) => ({ ...oldData, ...newData })
+    );
     this.ok(res, message);
+  }
+
+  async subscribeForMessages(req: Request, res: Response, next: NextFunction) {
+    this.pollingService.subscribe(
+      req.userPublicKey,
+      (payload: any) => this.ok(res, payload),
+      () => res.status(408)
+    );
   }
 }

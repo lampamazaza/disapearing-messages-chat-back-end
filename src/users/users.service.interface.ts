@@ -8,6 +8,6 @@ export interface IUserService {
     dto: UserCreateDto,
     userPublicKey: string
   ) => Promise<User | null>;
-  validateUser: () => Promise<boolean>;
+  // validateUser: () => Promise<boolean>;
   getUserInfo: (publicKey: string) => Promise<UserModel | null>;
 }

@@ -1,4 +1,4 @@
-import { ChatModel } from ".prisma/client";
+import { ChatModel, UsersOnChats } from ".prisma/client";
 import { inject, injectable } from "inversify";
 import { IConfigService } from "../config/config.service.interface";
 import { TYPES } from "../types";
@@ -15,7 +15,7 @@ export class ChatService implements IChatService {
     @inject(TYPES.ChatsRepository) private chatsRepository: IChatsRepository
   ) {}
 
-  async getUserChats(userPublicKey: string): Promise<ChatModel[]> {
+  async getUserChats(userPublicKey: string): Promise<UsersOnChats[]> {
     return this.chatsRepository.getUserChats(userPublicKey);
   }
   async getChatById(id: number): Promise<ChatModel | null> {

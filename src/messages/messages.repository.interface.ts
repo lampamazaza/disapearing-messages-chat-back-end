@@ -1,6 +1,7 @@
 import { MessageModel } from "prisma/prisma-client";
+import { Message } from "./message.entity";
 export interface IMessagesRepository {
-  create: (message: any) => Promise<any>;
+  create: (message: Message) => Promise<MessageModel>;
   getMessagesByCorrespondentPublicKey: (
     userPublicKey: string,
     correspondentPublickKey: string

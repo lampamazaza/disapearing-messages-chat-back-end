@@ -18,18 +18,35 @@ export class ChatsRepository implements IChatsRepository {
       where: {
         userPublicKey,
       },
-      include: {
-        user: true,
+      select: {
+        chatId: true,
       },
     });
 
     result = Promise.all(
       chats.map(async (item) => {
-        item["lastMessage"] =
-          await this.prismaService.client.messageModel.findFirst({
+        const [user, lastMessage] = await Promise.all([
+          this.prismaService.client.usersOnChats.findFirst({
+            where: {
+              chatId: item.chatId,
+              AND: {
+                userPublicKey: {
+                  not: userPublicKey,
+                },
+              },
+            },
+            include: {
+              user: true,
+            },
+          }),
+          this.prismaService.client.messageModel.findFirst({
             where: { chatId: item.chatId },
-            orderBy: { sentAt: "asc" },
-          });
+            orderBy: { sentAt: "desc" },
+          }),
+        ]);
+        item["user"] = user.user;
+        item["publicKey"] = user.user.publicKey;
+        item["lastMessage"] = lastMessage;
         return item;
       })
     );

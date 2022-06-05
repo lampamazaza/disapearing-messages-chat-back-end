@@ -15,17 +15,19 @@ export class MessageService implements IMessageService {
     private messagesRepository: IMessagesRepository
   ) {}
 
-  async create(message: MessageCreateDto): Promise<Message | null> {
-    const newMessage = new Message(
-      message.toPublicKey,
-      message.chatId,
-      message.from,
-      message.message
-    );
-
+  async create({
+    toPublicKey,
+    chatId,
+    from,
+    message,
+  }: MessageCreateDto): Promise<MessageModel | null> {
     try {
-      await this.messagesRepository.create(newMessage);
-      return newMessage;
+      return this.messagesRepository.create({
+        to: toPublicKey,
+        message,
+        chatId,
+        from,
+      });
     } catch (error) {
       return null;
     }

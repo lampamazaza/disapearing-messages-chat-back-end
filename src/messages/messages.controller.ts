@@ -11,6 +11,7 @@ import { IMessageService } from "./messages.service.interface";
 import { ValidateMiddleware } from "../common/validate.middleware";
 import { HTTPError } from "../errors/http-error.class";
 import { IPollingService } from "pollingService/polling.interface";
+import { PollingService } from "pollingService/polling.service";
 
 @injectable()
 export class MessageController
@@ -26,7 +27,7 @@ export class MessageController
     super(loggerService);
     this.bindRoutes([
       {
-        path: "/send",
+        path: "/",
         method: "post",
         func: this.sendMessage,
         middlewares: [new ValidateMiddleware(MessageCreateDto)],
@@ -53,7 +54,7 @@ export class MessageController
   ): Promise<void> {
     const messages =
       await this.messagesService.getMessagesByCorrespondentPublicKey(
-        userPublicKey,
+        "a",
         correspondentPublickKey
       );
 
@@ -74,17 +75,26 @@ export class MessageController
     next: NextFunction
   ): Promise<void> {
     const message = await this.messagesService.create(body);
+    const messageTo = body.toPublicKey;
     this.pollingService.publish(
-      message.to,
-      { [message.to]: message.chatId },
-      (oldData, newData) => ({ ...oldData, ...newData })
+      messageTo,
+      { [message.sender]: [message] },
+      (oldData) => {
+        return {
+          ...oldData,
+          ...{
+            [message.sender]: [...oldData[message.sender], ...[message]],
+          },
+        };
+      }
     );
     this.ok(res, message);
   }
 
   async subscribeForMessages(req: Request, res: Response, next: NextFunction) {
     this.pollingService.subscribe(
-      req.userPublicKey,
+      // req.userPublicKey,
+      "a",
       (payload: any) => this.ok(res, payload),
       () => res.status(408)
     );

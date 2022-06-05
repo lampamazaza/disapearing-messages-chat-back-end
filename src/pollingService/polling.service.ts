@@ -10,6 +10,7 @@ export class PollingService implements IPollingService {
 
   constructor() {
     this.subscribersStorage = {};
+    this.missedPublishStorage = {};
   }
 
   subscribe(
@@ -18,9 +19,9 @@ export class PollingService implements IPollingService {
     onFail: () => void
   ): void {
     if (this.missedPublishStorage[id]) {
-      clearInterval(this.subscribersStorage[id].timeoutId);
-      onSuccess(this.subscribersStorage[id].data);
-      delete this.subscribersStorage[id];
+      clearInterval(this.missedPublishStorage[id].timeoutId);
+      onSuccess(this.missedPublishStorage[id].data);
+      delete this.missedPublishStorage[id];
       return;
     }
     if (this.subscribersStorage[id]) {
@@ -32,6 +33,8 @@ export class PollingService implements IPollingService {
       delete this.subscribersStorage[id];
       onFail();
     }, 120_000);
+
+    this.subscribersStorage[id] = {};
 
     this.subscribersStorage[id].timeoutId = timeoutId;
 
@@ -45,7 +48,7 @@ export class PollingService implements IPollingService {
   publish(
     id: string,
     payload: any,
-    missedDataMerger: (oldData: any, newData) => any
+    missedDataMerger: (oldData: any) => any
   ): void {
     if (this.subscribersStorage[id]) {
       this.subscribersStorage[id].resolver(payload);
@@ -53,20 +56,19 @@ export class PollingService implements IPollingService {
       // has records
       if (this.missedPublishStorage[id]) {
         this.missedPublishStorage[id].data = missedDataMerger(
-          this.missedPublishStorage[id].data,
-          payload
+          this.missedPublishStorage[id].data
         );
-        clearInterval(this.subscribersStorage[id].timeoutId);
+        clearInterval(this.missedPublishStorage[id].timeoutId);
         const timeoutId = setTimeout(() => {
-          clearInterval(this.subscribersStorage[id].timeoutId);
-          delete this.subscribersStorage[id];
+          clearInterval(this.missedPublishStorage[id].timeoutId);
+          delete this.missedPublishStorage[id];
         }, 15_000);
-        this.subscribersStorage[id].timeoutId = timeoutId;
+        this.missedPublishStorage[id].timeoutId = timeoutId;
       } else {
         // no records
         const timeoutId = setTimeout(() => {
-          clearInterval(this.subscribersStorage[id].timeoutId);
-          delete this.subscribersStorage[id];
+          clearInterval(this.missedPublishStorage[id].timeoutId);
+          delete this.missedPublishStorage[id];
         }, 15_000);
 
         this.missedPublishStorage[id] = {

@@ -23,7 +23,7 @@ export class ChatController extends BaseController implements IChatController {
     super(loggerService);
     this.bindRoutes([
       {
-        path: "/chatsByUserId/:userid",
+        path: "/chatsByUserId/:userPublicKey",
         method: "get",
         func: this.getChatsByUser,
         // middlewares: [new AuthGuard()],

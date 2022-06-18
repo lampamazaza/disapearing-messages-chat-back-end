@@ -15,17 +15,10 @@ export class UserService implements IUserService {
     @inject(TYPES.UsersRepository) private usersRepository: IUsersRepository
   ) {}
 
-  async createUser({
-    publicKey,
-    name,
-    alias,
-  }: UserCreateDto): Promise<UserModel | null> {
-    const newUser = new User(publicKey, name, alias);
-    const existedUser = await this.usersRepository.find(publicKey);
-    if (existedUser) {
-      return null;
-    }
-    return this.usersRepository.create(newUser);
+  async createUser(userToCreate: UserCreateDto): Promise<UserModel | null> {
+    const userAlreadyExist = this.usersRepository.findByAlias(userToCreate.alias)
+    if(userAlreadyExist) return null
+    return this.usersRepository.create(userToCreate);
   }
 
   async updateUserInfo(

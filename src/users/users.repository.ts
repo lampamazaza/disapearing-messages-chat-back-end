@@ -28,6 +28,13 @@ export class UsersRepository implements IUsersRepository {
       },
     });
   }
+  async findByAlias(alias: string): Promise<UserModel | null> {
+    return this.prismaService.client.userModel.findFirst({
+      where: {
+        alias,
+      },
+    });
+  }
 
   async update(user: User): Promise<UserModel> {
     return this.prismaService.client.userModel.update({

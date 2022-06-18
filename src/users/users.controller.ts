@@ -90,15 +90,15 @@ export class UserController extends BaseController implements IUserController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const result = await this.userService.createUser(body);
-    if (!result) {
-      return next(new HTTPError(422, "User already exists"));
+    try {
+      const result = await this.userService.createUser(body);
+      if(!result) {
+        return next(new HTTPError(409, "User with this alias already exist"));
+      }
+      this.ok(res, result);
+    } catch(error) {
+      return next(new HTTPError(500, "Something went wrong"));
     }
-    this.ok(res, {
-      publicKey: result.publicKey,
-      alias: result.alias,
-      name: result.name,
-    });
   }
 
   async info(

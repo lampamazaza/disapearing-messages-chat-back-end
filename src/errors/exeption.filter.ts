@@ -20,7 +20,7 @@ export class ExeptionFilter implements IExeptionFilter {
       this.logger.error(
         `[${err.context}] Error ${err.statusCode}: ${err.message}`
       );
-      res.status(err.statusCode).send({ errorMessage: err.message });
+      res.status(err.statusCode).send({ message: err.message });
     } else {
       this.logger.error(`${err.message}`);
       res.status(500).send({ err: err.message });

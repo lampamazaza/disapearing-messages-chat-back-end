@@ -13,8 +13,8 @@ datasource db {
 model UserModel {
     id        Int            @id @default(autoincrement())
     publicKey String         @unique
-    name      String?
-    alias     String?        @unique
+    name      String
+    alias     String         @unique
     chats     UsersOnChats[]
 }
 

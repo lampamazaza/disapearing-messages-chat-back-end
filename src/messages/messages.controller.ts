@@ -94,7 +94,7 @@ export class MessageController
     this.pollingService.subscribe(
       userPublicKey,
       (payload: any) => this.ok(res, payload),
-      () => res.status(408)
+      () => res.status(408).send()
     );
   }
 }

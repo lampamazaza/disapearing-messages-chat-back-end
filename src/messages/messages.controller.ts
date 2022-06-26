@@ -10,8 +10,8 @@ import { IConfigService } from "../config/config.service.interface";
 import { IMessageService } from "./messages.service.interface";
 import { ValidateMiddleware } from "../common/validate.middleware";
 import { HTTPError } from "../errors/http-error.class";
-import { IPollingService } from "pollingService/polling.interface";
-import { PollingService } from "pollingService/polling.service";
+import { IPollingService } from "services/pollingService/polling.interface";
+import { AuthGuard } from "../common/auth.guard";
 
 @injectable()
 export class MessageController
@@ -30,55 +30,50 @@ export class MessageController
         path: "/",
         method: "post",
         func: this.sendMessage,
-        middlewares: [new ValidateMiddleware(MessageCreateDto)],
+        middlewares: [
+          new ValidateMiddleware(MessageCreateDto),
+          new AuthGuard(),
+        ],
       },
       {
-        path: "/:correspondentPublickKey",
+        path: "/:publicKey",
         method: "get",
         func: this.getMessagesByChat,
-        // middlewares: [new AuthGuard()],
+        middlewares: [new AuthGuard()],
       },
       {
         path: "/subscribe",
         method: "post",
         func: this.subscribeForMessages,
-        // middlewares: [new AuthGuard()],
+        middlewares: [new AuthGuard()],
       },
     ]);
   }
 
   async getMessagesByChat(
-    { userPublicKey, params: { correspondentPublickKey } }: Request,
+    { userPublicKey, params: { publicKey } }: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     const messages =
       await this.messagesService.getMessagesByCorrespondentPublicKey(
-        "a",
-        correspondentPublickKey
+        userPublicKey,
+        publicKey
       );
 
-    if (!messages) {
-      return next(
-        new HTTPError(
-          404,
-          "There are no messages in this chat, or chat doesn't exist"
-        )
-      );
-    }
     this.ok(res, messages);
   }
 
   async sendMessage(
-    { body }: Request<{}, {}, MessageCreateDto>,
+    { body, userPublicKey }: Request<{}, {}, MessageCreateDto>,
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const message = await this.messagesService.create(body);
+    const message = await this.messagesService.create(body, userPublicKey);
     const messageTo = body.toPublicKey;
     this.pollingService.publish(
       messageTo,
-      { [message.sender]: [message] },
+      { [userPublicKey]: [message] },
       (oldData) => {
         return {
           ...oldData,
@@ -91,10 +86,13 @@ export class MessageController
     this.ok(res, message);
   }
 
-  async subscribeForMessages(req: Request, res: Response, next: NextFunction) {
+  async subscribeForMessages(
+    { userPublicKey }: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     this.pollingService.subscribe(
-      // req.userPublicKey,
-      "a",
+      userPublicKey,
       (payload: any) => this.ok(res, payload),
       () => res.status(408)
     );

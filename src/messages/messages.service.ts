@@ -15,18 +15,16 @@ export class MessageService implements IMessageService {
     private messagesRepository: IMessagesRepository
   ) {}
 
-  async create({
-    toPublicKey,
-    chatId,
-    from,
-    message,
-  }: MessageCreateDto): Promise<MessageModel | null> {
+  async create(
+    { toPublicKey, chatId, message }: MessageCreateDto,
+    userPublicKey: string
+  ): Promise<MessageModel | null> {
     try {
       return this.messagesRepository.create({
         to: toPublicKey,
         message,
         chatId,
-        from,
+        from: userPublicKey,
       });
     } catch (error) {
       return null;
@@ -35,11 +33,11 @@ export class MessageService implements IMessageService {
 
   async getMessagesByCorrespondentPublicKey(
     userPublicKey: string,
-    correspondentPublickKey: string
+    publicKey: string
   ): Promise<MessageModel[]> {
     return this.messagesRepository.getMessagesByCorrespondentPublicKey(
       userPublicKey,
-      correspondentPublickKey
+      publicKey
     );
   }
 }

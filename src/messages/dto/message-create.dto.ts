@@ -8,8 +8,6 @@ export class MessageCreateDto {
   // @IsNumber({}, { message: "Non valid chat id" })
   chatId: number;
 
-  from: string;
-
   @IsString({ message: "Message should be a string" })
   @IsNotEmpty({ message: "Message should not be empty" })
   @MaxLength(500, {

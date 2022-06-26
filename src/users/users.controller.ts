@@ -28,29 +28,34 @@ export class UserController extends BaseController implements IUserController {
         func: this.create,
         middlewares: [new ValidateMiddleware(UserCreateDto)],
       },
-      // {
-      //   path: "/login",
-      //   method: "post",
-      //   func: this.login,
-      // },
       {
-        path: "/:user",
+        path: "/authenticate",
+        method: "post",
+        func: this.authenticate,
+      },
+      {
+        path: "/authenticationData/:publicKey",
+        method: "get",
+        func: this.getAuthenticationData,
+      },
+      {
+        path: "/:alias",
         method: "get",
         func: this.info,
-        // middlewares: [new AuthGuard()],
+        middlewares: [new AuthGuard()],
+      },
+      {
+        path: "/byPublicKey/:publicKey",
+        method: "get",
+        func: this.infoByPublicKey,
+        middlewares: [new AuthGuard()],
       },
       {
         path: "/:userPublicKeyToUpdate",
         method: "put",
         func: this.updateUser,
-        // middlewares: [new AuthGuard()],
+        middlewares: [new AuthGuard()],
       },
-      // {
-      //   path: "/:user",
-      //   method: "get",
-      //   func: this.info,
-      //   // middlewares: [new AuthGuard()],
-      // },
     ]);
   }
 
@@ -69,21 +74,34 @@ export class UserController extends BaseController implements IUserController {
     this.ok(res, updatedUserInfo);
   }
 
-  // async login(
-  //   { body: { userPublicKey, nonce } }: Request<{}, {}, {}>,
-  //   res: Response,
-  //   next: NextFunction
-  // ): Promise<void> {
-  //   const result = await this.userService.validateUser(userPublicKey, nonce);
-  //   if (!result) {
-  //     return next(new HTTPError(401, "Auth error", "login"));
-  //   }
-  //   const jwt = await this.signJWT(
-  //     userPublicKey,
-  //     this.configService.get("SECRET")
-  //   );
-  //   this.ok(res, { jwt });
-  // }
+  async authenticate(
+    {
+      body: { decryptedMsg, publicKey },
+    }: Request<{}, {}, { decryptedMsg: number[]; publicKey: string }>,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    const { isSuccessfullyAuthenticated, user } =
+      await this.userService.authenticate(decryptedMsg, publicKey);
+    if (!isSuccessfullyAuthenticated) {
+      return next(new HTTPError(401, "Auth error", "login"));
+    }
+    const jwt = await this.signJWT(publicKey, this.configService.get("SECRET"));
+    this.ok(res, {
+      accessToken: jwt,
+      user,
+    });
+  }
+
+  async getAuthenticationData(
+    { params: { publicKey } }: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    const result = await this.userService.getAuthenticationData(publicKey);
+
+    this.ok(res, result);
+  }
 
   async create(
     { body }: Request<{}, {}, UserCreateDto>,
@@ -92,21 +110,21 @@ export class UserController extends BaseController implements IUserController {
   ): Promise<void> {
     try {
       const result = await this.userService.createUser(body);
-      if(!result) {
+      if (!result) {
         return next(new HTTPError(409, "User with this alias already exist"));
       }
       this.ok(res, result);
-    } catch(error) {
+    } catch (error) {
       return next(new HTTPError(500, "Something went wrong"));
     }
   }
 
   async info(
-    { params: { user } }: Request,
+    { params: { alias } }: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const userInfo = await this.userService.getUserInfo(user);
+    const userInfo = await this.userService.getUserInfo(alias);
     if (!userInfo) {
       return next(new HTTPError(404, "User not found"));
     }
@@ -117,24 +135,41 @@ export class UserController extends BaseController implements IUserController {
     });
   }
 
-  // private signJWT(publicKey: string, secret: string): Promise<string> {
-  //   return new Promise<string>((resolve, reject) => {
-  //     sign(
-  //       {
-  //         publicKey,
-  //         iat: Math.floor(Date.now() / 1000),
-  //       },
-  //       secret,
-  //       {
-  //         algorithm: "HS256",
-  //       },
-  //       (err, token) => {
-  //         if (err) {
-  //           reject(err);
-  //         }
-  //         resolve(token as string);
-  //       }
-  //     );
-  //   });
-  // }
+  async infoByPublicKey(
+    { params: { publicKey } }: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    const userInfo = await this.userService.getUserInfoByPublicKey(publicKey);
+    if (!userInfo) {
+      return next(new HTTPError(404, "User not found"));
+    }
+    this.ok(res, {
+      publicKey: userInfo?.publicKey,
+      alias: userInfo?.alias,
+      name: userInfo?.name,
+    });
+  }
+
+  private signJWT(publicKey: string, secret: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      sign(
+        {
+          publicKey,
+          iat: Math.floor(Date.now() / 1000),
+        },
+        secret,
+        {
+          algorithm: "HS256",
+          expiresIn: "7 days",
+        },
+        (err, token) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(token as string);
+        }
+      );
+    });
+  }
 }

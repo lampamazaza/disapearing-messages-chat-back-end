@@ -9,5 +9,14 @@ export interface IUserService {
     userPublicKey: string
   ) => Promise<User | null>;
   // validateUser: () => Promise<boolean>;
-  getUserInfo: (publicKey: string) => Promise<UserModel | null>;
+  getUserInfo: (alias: string) => Promise<UserModel | null>;
+  getUserInfoByPublicKey: (publicKey: string) => Promise<UserModel | null>;
+  getAuthenticationData: (publicKey: string) => Promise<any>;
+  authenticate: (
+    decryptedMsg: number[],
+    publicKey: string
+  ) => Promise<{
+    isSuccessfullyAuthenticated: boolean;
+    user: UserModel | null;
+  }>;
 }

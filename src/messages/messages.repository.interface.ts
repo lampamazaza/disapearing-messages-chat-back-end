@@ -4,6 +4,6 @@ export interface IMessagesRepository {
   create: (message: Message) => Promise<MessageModel>;
   getMessagesByCorrespondentPublicKey: (
     userPublicKey: string,
-    correspondentPublickKey: string
+    alias: string
   ) => Promise<MessageModel[]>;
 }

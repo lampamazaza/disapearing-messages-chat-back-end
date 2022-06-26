@@ -76,9 +76,15 @@ export class MessagesRepository implements IMessagesRepository {
 
   async getMessagesByCorrespondentPublicKey(
     userPublicKey: string,
-    correspondentPublickKey: string
+    publicKey: string
   ): Promise<MessageModel[]> {
-    const chatHash = await generateHash(userPublicKey, correspondentPublickKey);
+    const user = await this.prismaService.client.userModel.findFirst({
+      where: {
+        publicKey,
+      },
+    });
+    if (!user) return null;
+    const chatHash = await generateHash(userPublicKey, user.publicKey);
 
     const chat = await this.prismaService.client.chatModel.findFirst({
       where: {
@@ -86,7 +92,7 @@ export class MessagesRepository implements IMessagesRepository {
       },
     });
 
-    if (chat === null) return null;
+    if (chat === null) return [];
 
     return this.prismaService.client.messageModel.findMany({
       where: { chatId: chat.id },

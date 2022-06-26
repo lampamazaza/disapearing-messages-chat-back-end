@@ -26,7 +26,8 @@ import { IMessageService } from "./messages/messages.service.interface";
 import { MessageService } from "./messages/messages.service";
 import { IMessagesRepository } from "./messages/messages.repository.interface";
 import { MessagesRepository } from "./messages/messages.repository";
-import { PollingService } from "./pollingService/polling.service";
+import { PollingService } from "./services/pollingService/polling.service";
+import { AuthenticationService } from "./services/authenticationService/authenticationService";
 export interface IBootstrapReturn {
   appContainer: Container;
   app: App;
@@ -37,7 +38,11 @@ export const appBindings = new ContainerModule((bind: interfaces.Bind) => {
   bind<PollingService>(TYPES.PollingSerivce)
     .to(PollingService)
     .inSingletonScope();
+  bind<AuthenticationService>(TYPES.AuthenticationService)
+    .to(AuthenticationService)
+    .inSingletonScope();
   bind<IExeptionFilter>(TYPES.ExeptionFilter).to(ExeptionFilter);
+
   bind<IUserController>(TYPES.UserController).to(UserController);
   bind<IUserService>(TYPES.UserService).to(UserService);
   bind<IChatController>(TYPES.ChatController).to(ChatController);

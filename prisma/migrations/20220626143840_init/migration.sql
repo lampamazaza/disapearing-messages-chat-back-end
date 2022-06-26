@@ -2,8 +2,8 @@
 CREATE TABLE "UserModel" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "publicKey" TEXT NOT NULL,
-    "name" TEXT,
-    "alias" TEXT
+    "name" TEXT NOT NULL,
+    "alias" TEXT NOT NULL
 );
 
 -- CreateTable

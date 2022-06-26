@@ -1,14 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { injectable, inject } from "inversify";
 import { BaseController } from "../common/base.controller";
-import { HTTPError } from "../errors/http-error.class";
 import { ILogger } from "../logger/logger.interface";
 import { TYPES } from "../types";
 import "reflect-metadata";
 import { IChatController } from "./chats.controller.interface";
-import { UserCreateDto } from "./dto/chat-create.dto";
-import { ValidateMiddleware } from "../common/validate.middleware";
-import { sign } from "jsonwebtoken";
 import { IConfigService } from "../config/config.service.interface";
 import { IChatService } from "./chats.service.interface";
 import { AuthGuard } from "../common/auth.guard";
@@ -23,22 +19,22 @@ export class ChatController extends BaseController implements IChatController {
     super(loggerService);
     this.bindRoutes([
       {
-        path: "/chatsByUserId/:userPublicKey",
+        path: "/",
         method: "get",
         func: this.getChatsByUser,
-        // middlewares: [new AuthGuard()],
+        middlewares: [new AuthGuard()],
       },
-      {
-        path: "/:chatId",
-        method: "get",
-        func: this.getChatById,
-        // middlewares: [new AuthGuard()],
-      },
+      // {
+      //   path: "/:chatId",
+      //   method: "get",
+      //   func: this.getChatById,
+      //   // middlewares: [new AuthGuard()],
+      // },
     ]);
   }
 
   async getChatsByUser(
-    { params: { userPublicKey } }: Request,
+    { userPublicKey }: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> {
@@ -46,15 +42,15 @@ export class ChatController extends BaseController implements IChatController {
     this.ok(res, userChats);
   }
 
-  async getChatById(
-    { params: { chatId } }: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    const chat = await this.chatsService.getChatById(+chatId);
-    if (!chat) {
-      return next(new HTTPError(404, "Chat not found"));
-    }
-    this.ok(res, chat);
-  }
+  // async getChatById(
+  //   { params: { chatId } }: Request,
+  //   res: Response,
+  //   next: NextFunction
+  // ): Promise<void> {
+  //   const chat = await this.chatsService.getChatById(+chatId);
+  //   if (!chat) {
+  //     return next(new HTTPError(404, "Chat not found"));
+  //   }
+  //   this.ok(res, chat);
+  // }
 }

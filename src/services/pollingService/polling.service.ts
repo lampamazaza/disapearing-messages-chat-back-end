@@ -24,8 +24,11 @@ export class PollingService implements IPollingService {
       delete this.missedPublishStorage[id];
       return;
     }
+    // if already exists
     if (this.subscribersStorage[id]) {
-      return;
+      clearInterval(this.subscribersStorage[id].timeoutId);
+      this.subscribersStorage[id].resolver()
+      delete this.subscribersStorage[id];
     }
 
     const timeoutId = setTimeout(() => {

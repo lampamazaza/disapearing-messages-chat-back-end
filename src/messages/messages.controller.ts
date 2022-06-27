@@ -87,12 +87,14 @@ export class MessageController
   }
 
   async subscribeForMessages(
-    { userPublicKey }: Request,
+    req: Request,
     res: Response,
     next: NextFunction
   ) {
+    req.setTimeout(120 * 1000)
+
     this.pollingService.subscribe(
-      userPublicKey,
+      req.userPublicKey,
       (payload: any) => this.ok(res, payload),
       () => res.status(408).send()
     );

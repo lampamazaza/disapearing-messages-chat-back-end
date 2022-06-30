@@ -22,13 +22,13 @@ export class MessageDeletionService implements IMessageDeletionService {
   }
 
   async wipeAllMessagesOlderThanTwoDay() {
+    const now = new Date();
     try {
       const { count } =
         await this.messagesRepository.wipeAllMessagesOlderThanTwoDays();
-      const now = new Date();
       this.logger.log(`Deleted ${count} messages at ${now.toUTCString()}`);
     } catch (error) {
-      console.log("Failed to delete messages");
+      this.logger.error(`Failed to delete messages at ${now.toUTCString()}`);
     }
   }
 }

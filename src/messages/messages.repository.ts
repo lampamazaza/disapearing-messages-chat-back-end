@@ -99,4 +99,15 @@ export class MessagesRepository implements IMessagesRepository {
       orderBy: { sentAt: "asc" },
     });
   }
+
+  async wipeAllMessagesOlderThanTwoDays() {
+    return await this.prismaService.client.messageModel.deleteMany({
+      where: {
+        sentAt: {
+          //172800000 - two days in ms
+          lte: new Date(new Date().getTime() - 172800000),
+        },
+      },
+    });
+  }
 }

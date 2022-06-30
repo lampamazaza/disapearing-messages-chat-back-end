@@ -13,6 +13,7 @@ import { UserController } from "./users/users.controller";
 import { ChatController } from "./chats/chats.controller";
 import { MessageController } from "./messages/messages.controller";
 import { PrismaService } from "./database/prisma.service";
+import { MessageDeletionService } from "./services/messageDeletionService/messageDeletionService";
 import { AuthMiddleware } from "./common/auth.middleware";
 
 @injectable()
@@ -29,7 +30,9 @@ export class App {
     private messageController: MessageController,
     @inject(TYPES.ExeptionFilter) private exeptionFilter: IExeptionFilter,
     @inject(TYPES.ConfigService) private configService: IConfigService,
-    @inject(TYPES.PrismaService) private prismaService: PrismaService
+    @inject(TYPES.PrismaService) private prismaService: PrismaService,
+    @inject(TYPES.MessageDeletionService)
+    private messageDeletionService: MessageDeletionService
   ) {
     this.app = express();
     this.port = 8000;
@@ -57,6 +60,7 @@ export class App {
     this.useRoutes();
     this.useExeptionFilters();
     await this.prismaService.connect();
+    this.messageDeletionService.init();
     this.server = this.app.listen(this.port);
     this.logger.log(`Server started at http://localhost:${this.port}`);
   }

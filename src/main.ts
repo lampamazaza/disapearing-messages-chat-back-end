@@ -28,6 +28,7 @@ import { IMessagesRepository } from "./messages/messages.repository.interface";
 import { MessagesRepository } from "./messages/messages.repository";
 import { PollingService } from "./services/pollingService/polling.service";
 import { AuthenticationService } from "./services/authenticationService/authenticationService";
+import { MessageDeletionService } from "./services/messageDeletionService/messageDeletionService";
 export interface IBootstrapReturn {
   appContainer: Container;
   app: App;
@@ -37,6 +38,9 @@ export const appBindings = new ContainerModule((bind: interfaces.Bind) => {
   bind<ILogger>(TYPES.ILogger).to(LoggerService).inSingletonScope();
   bind<PollingService>(TYPES.PollingSerivce)
     .to(PollingService)
+    .inSingletonScope();
+  bind<MessageDeletionService>(TYPES.MessageDeletionService)
+    .to(MessageDeletionService)
     .inSingletonScope();
   bind<AuthenticationService>(TYPES.AuthenticationService)
     .to(AuthenticationService)

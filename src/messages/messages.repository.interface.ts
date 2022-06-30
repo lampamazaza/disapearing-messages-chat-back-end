@@ -6,4 +6,7 @@ export interface IMessagesRepository {
     userPublicKey: string,
     alias: string
   ) => Promise<MessageModel[]>;
+  wipeAllMessagesOlderThanTwoDays: () => Promise<{
+    count: number;
+  }>;
 }

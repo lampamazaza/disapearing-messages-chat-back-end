@@ -12,7 +12,11 @@ import { sign } from "jsonwebtoken";
 import { IConfigService } from "../config/config.service.interface";
 import { IUserService } from "./users.service.interface";
 import { AuthGuard } from "../common/auth.guard";
-
+import {
+  COOKIE_TOKEN_NAME,
+  COOKIE_TOKEN_OPTIONS,
+  DELETED_COOKIE_VAlUE,
+} from "./constants";
 @injectable()
 export class UserController extends BaseController implements IUserController {
   constructor(
@@ -29,14 +33,26 @@ export class UserController extends BaseController implements IUserController {
         middlewares: [new ValidateMiddleware(UserCreateDto)],
       },
       {
-        path: "/authenticate",
+        path: "/auth/authenticate",
         method: "post",
         func: this.authenticate,
       },
       {
-        path: "/authenticationData/:publicKey",
+        path: "/auth/authenticationData/:publicKey",
         method: "get",
         func: this.getAuthenticationData,
+      },
+      {
+        path: "/auth/login",
+        method: "get",
+        func: this.login,
+        middlewares: [new AuthGuard()],
+      },
+      {
+        path: "/auth/logout",
+        method: "post",
+        func: this.logout,
+        middlewares: [new AuthGuard()],
       },
       {
         path: "/:alias",
@@ -74,6 +90,16 @@ export class UserController extends BaseController implements IUserController {
     this.ok(res, updatedUserInfo);
   }
 
+  async login({ userPublicKey }: Request, res: Response) {
+    const user = await this.userService.login(userPublicKey);
+    this.ok(res, user);
+  }
+
+  async logout(_req: Request, res: Response) {
+    res.cookie(COOKIE_TOKEN_NAME, DELETED_COOKIE_VAlUE, COOKIE_TOKEN_OPTIONS);
+    res.sendStatus(200);
+  }
+
   async authenticate(
     {
       body: { decryptedMsg, publicKey },
@@ -87,8 +113,8 @@ export class UserController extends BaseController implements IUserController {
       return next(new HTTPError(401, "Auth error", "login"));
     }
     const jwt = await this.signJWT(publicKey, this.configService.get("SECRET"));
+    res.cookie(COOKIE_TOKEN_NAME, jwt, COOKIE_TOKEN_OPTIONS);
     this.ok(res, {
-      accessToken: jwt,
       user,
     });
   }

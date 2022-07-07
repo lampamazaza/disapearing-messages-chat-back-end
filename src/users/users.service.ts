@@ -58,4 +58,8 @@ export class UserService implements IUserService {
   async getUserInfoByPublicKey(publicKey: string): Promise<UserModel | null> {
     return this.usersRepository.find(publicKey);
   }
+
+  async login(publicKey: string): Promise<UserModel | null> {
+    return this.usersRepository.find(publicKey);
+  }
 }

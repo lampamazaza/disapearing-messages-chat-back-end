@@ -83,15 +83,12 @@ export class MessageController
         };
       }
     );
+
     this.ok(res, message);
   }
 
-  async subscribeForMessages(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    req.setTimeout(120 * 1000)
+  async subscribeForMessages(req: Request, res: Response, next: NextFunction) {
+    req.setTimeout(120 * 1000);
 
     this.pollingService.subscribe(
       req.userPublicKey,

@@ -19,4 +19,5 @@ export interface IUserService {
     isSuccessfullyAuthenticated: boolean;
     user: UserModel | null;
   }>;
+  login: (userPublicKey: string) => Promise<UserModel | null>;
 }

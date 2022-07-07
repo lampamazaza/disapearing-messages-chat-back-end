@@ -1,24 +1,39 @@
 import { IMiddleware } from "./middleware.interface";
 import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
+import {
+  COOKIE_TOKEN_NAME,
+  DELETED_COOKIE_VAlUE,
+  COOKIE_TOKEN_OPTIONS,
+  TOKEN_LENGTH,
+} from "../users/constants";
 
+function getToken(cookies: string) {
+  const delimeter = `${COOKIE_TOKEN_NAME}=`;
+  const delimeterLength = delimeter.length;
+  const start = cookies.search(`${COOKIE_TOKEN_NAME}=`) + delimeterLength;
+  return cookies.slice(start, start + TOKEN_LENGTH);
+}
 export class AuthMiddleware implements IMiddleware {
   constructor(private secret: string) {}
 
   execute(req: Request, res: Response, next: NextFunction): void {
-    if (req.headers.authorization) {
-      verify(
-        req.headers.authorization.split(" ")[1],
-        this.secret,
-        (err, payload) => {
-          if (err) {
-            next();
-          } else if (payload) {
-            req.userPublicKey = payload.publicKey;
-            next();
-          }
+    if (req.headers.cookie) {
+      const token = getToken(req.headers.cookie);
+      verify(token, this.secret, (err, payload) => {
+        if (err) {
+          // Expire cookie if token non valid
+          res.cookie(
+            COOKIE_TOKEN_NAME,
+            DELETED_COOKIE_VAlUE,
+            COOKIE_TOKEN_OPTIONS
+          );
+          next();
+        } else if (payload) {
+          req.userPublicKey = payload.publicKey;
+          next();
         }
-      );
+      });
     } else {
       next();
     }

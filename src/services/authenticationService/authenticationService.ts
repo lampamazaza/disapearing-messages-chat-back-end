@@ -15,7 +15,7 @@ export class AuthenticationService implements IAuthenticationService {
     try {
       delete this.pendingChecksStorage[publicKey];
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 

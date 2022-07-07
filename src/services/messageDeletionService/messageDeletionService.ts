@@ -15,8 +15,8 @@ export class MessageDeletionService implements IMessageDeletionService {
     private logger: ILogger
   ) {}
   async init() {
-    //“At every minute past hour 0.”
-    cron.schedule("* 0 * * *", async () => {
+    //“At 00:00.”
+    cron.schedule("0 0 * * *", async () => {
       this.wipeAllMessagesOlderThanTwoDay();
     });
   }

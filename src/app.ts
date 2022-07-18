@@ -35,7 +35,7 @@ export class App {
     private messageDeletionService: MessageDeletionService
   ) {
     this.app = express();
-    this.port = 8000;
+    this.port = 5000;
   }
 
   useMiddleware(): void {

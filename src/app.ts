@@ -39,7 +39,7 @@ export class App {
   }
 
   useMiddleware(): void {
-    this.app.use(cors({ credentials: true, origin: "http://localhost:8001" }));
+    // this.app.use(cors({ credentials: true, origin: "http://localhost:8001" }));
     this.app.use(json());
     const authMiddleware = new AuthMiddleware(this.configService.get("SECRET"));
     this.app.use(authMiddleware.execute.bind(authMiddleware));

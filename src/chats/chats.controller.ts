@@ -8,6 +8,7 @@ import { IChatController } from "./chats.controller.interface";
 import { IConfigService } from "../config/config.service.interface";
 import { IChatService } from "./chats.service.interface";
 import { AuthGuard } from "../common/auth.guard";
+import { HTTPError } from "../errors/http-error.class";
 
 @injectable()
 export class ChatController extends BaseController implements IChatController {
@@ -24,12 +25,6 @@ export class ChatController extends BaseController implements IChatController {
         func: this.getChatsByUser,
         middlewares: [new AuthGuard()],
       },
-      // {
-      //   path: "/:chatId",
-      //   method: "get",
-      //   func: this.getChatById,
-      //   // middlewares: [new AuthGuard()],
-      // },
     ]);
   }
 
@@ -38,19 +33,12 @@ export class ChatController extends BaseController implements IChatController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const userChats = await this.chatsService.getUserChats(userPublicKey);
-    this.ok(res, userChats);
+    try {
+      const userChats = await this.chatsService.getUserChats(userPublicKey);
+      this.ok(res, userChats);
+    } catch (error) {
+      return next(new HTTPError(500, `Failed to get chats for a user ${userPublicKey}`, "Chats", error.stack));
+    }
   }
 
-  // async getChatById(
-  //   { params: { chatId } }: Request,
-  //   res: Response,
-  //   next: NextFunction
-  // ): Promise<void> {
-  //   const chat = await this.chatsService.getChatById(+chatId);
-  //   if (!chat) {
-  //     return next(new HTTPError(404, "Chat not found"));
-  //   }
-  //   this.ok(res, chat);
-  // }
 }

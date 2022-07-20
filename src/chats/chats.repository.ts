@@ -53,15 +53,4 @@ export class ChatsRepository implements IChatsRepository {
 
     return result;
   }
-  async getChatById(id: number): Promise<ChatModel | null> {
-    const chat = await this.prismaService.client.chatModel.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!chat) return null;
-
-    return chat;
-  }
 }

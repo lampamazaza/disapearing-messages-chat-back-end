@@ -16,8 +16,7 @@ import { AuthGuard } from "../common/auth.guard";
 @injectable()
 export class MessageController
   extends BaseController
-  implements IMessageController
-{
+  implements IMessageController {
   constructor(
     @inject(TYPES.ILogger) private loggerService: ILogger,
     @inject(TYPES.MessageService) private messagesService: IMessageService,
@@ -55,13 +54,17 @@ export class MessageController
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const messages =
-      await this.messagesService.getMessagesByCorrespondentPublicKey(
-        userPublicKey,
-        publicKey
-      );
+    try {
+      const messages =
+        await this.messagesService.getMessagesByCorrespondentPublicKey(
+          userPublicKey,
+          publicKey
+        );
 
-    this.ok(res, messages);
+      this.ok(res, messages);
+    } catch (error) {
+      return next(new HTTPError(500, "Failed to get messages in a chat", "Messages", error.stack));
+    }
   }
 
   async sendMessage(
@@ -69,31 +72,39 @@ export class MessageController
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const message = await this.messagesService.create(body, userPublicKey);
-    const messageTo = body.toPublicKey;
-    this.pollingService.publish(
-      messageTo,
-      { [userPublicKey]: [message] },
-      (oldData) => {
-        return {
-          ...oldData,
-          ...{
-            [message.sender]: [...oldData[message.sender], ...[message]],
-          },
-        };
-      }
-    );
+    try {
+      const message = await this.messagesService.create(body, userPublicKey);
+      const messageTo = body.toPublicKey;
+      this.pollingService.publish(
+        messageTo,
+        { [userPublicKey]: [message] },
+        (oldData) => {
+          return {
+            ...oldData,
+            ...{
+              [message.sender]: [...oldData[message.sender], ...[message]],
+            },
+          };
+        }
+      );
+      this.ok(res, message);
+    } catch (error) {
+      return next(new HTTPError(500, "Failed to send a message", "Messages", error.stack));
+    }
 
-    this.ok(res, message);
   }
 
   async subscribeForMessages(req: Request, res: Response, next: NextFunction) {
-    req.setTimeout(120 * 1000);
+    try {
+      req.setTimeout(120 * 1000);
 
-    this.pollingService.subscribe(
-      req.userPublicKey,
-      (payload: any) => this.ok(res, payload),
-      () => res.status(408).send()
-    );
+      this.pollingService.subscribe(
+        req.userPublicKey,
+        (payload: any) => this.ok(res, payload),
+        () => res.status(408).send()
+      );
+    } catch (error) {
+      return next(new HTTPError(500, "Failed to subscribe for messages update", "Messages", error.stack));
+    }
   }
 }

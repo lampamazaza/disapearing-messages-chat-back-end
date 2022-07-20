@@ -80,24 +80,36 @@ export class UserController extends BaseController implements IUserController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    if (userPublicKeyToUpdate !== userPublicKey) {
-      return next(new HTTPError(403, "You can't change other people account"));
+    try {
+      if (userPublicKeyToUpdate !== userPublicKey) {
+        return next(new HTTPError(403, "You can't change other people account"));
+      }
+      const updatedUserInfo = await this.userService.updateUserInfo(
+        body,
+        userPublicKey
+      );
+      this.ok(res, updatedUserInfo);
+    } catch (error) {
+      return next(new HTTPError(500, "Failed to update user data", "Users", error.stack));
     }
-    const updatedUserInfo = await this.userService.updateUserInfo(
-      body,
-      userPublicKey
-    );
-    this.ok(res, updatedUserInfo);
   }
 
-  async login({ userPublicKey }: Request, res: Response) {
-    const user = await this.userService.login(userPublicKey);
-    this.ok(res, user);
+  async login({ userPublicKey }: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await this.userService.login(userPublicKey);
+      this.ok(res, user);
+    } catch (error) {
+      return next(new HTTPError(500, "Failed to login", "Auth", error.stack));
+    }
   }
 
-  async logout(_req: Request, res: Response) {
-    res.cookie(COOKIE_TOKEN_NAME, DELETED_COOKIE_VAlUE, COOKIE_TOKEN_OPTIONS);
-    res.sendStatus(200);
+  async logout(_req: Request, res: Response, next: NextFunction) {
+    try {
+      res.cookie(COOKIE_TOKEN_NAME, DELETED_COOKIE_VAlUE, COOKIE_TOKEN_OPTIONS);
+      res.sendStatus(200);
+    } catch (error) {
+      return next(new HTTPError(500, "Failed to logout", "Auth", error.stack));
+    }
   }
 
   async authenticate(
@@ -107,16 +119,20 @@ export class UserController extends BaseController implements IUserController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const { isSuccessfullyAuthenticated, user } =
-      await this.userService.authenticate(decryptedMsg, publicKey);
-    if (!isSuccessfullyAuthenticated) {
-      return next(new HTTPError(401, "Auth error", "login"));
+    try {
+      const { isSuccessfullyAuthenticated, user } =
+        await this.userService.authenticate(decryptedMsg, publicKey);
+      if (!isSuccessfullyAuthenticated) {
+        return next(new HTTPError(401, "Auth error", "login"));
+      }
+      const jwt = await this.signJWT(publicKey, this.configService.get("SECRET"));
+      res.cookie(COOKIE_TOKEN_NAME, jwt, COOKIE_TOKEN_OPTIONS);
+      this.ok(res, {
+        user,
+      });
+    } catch (error) {
+      return next(new HTTPError(500, "Failed to authenticate", "Auth", error.stack));
     }
-    const jwt = await this.signJWT(publicKey, this.configService.get("SECRET"));
-    res.cookie(COOKIE_TOKEN_NAME, jwt, COOKIE_TOKEN_OPTIONS);
-    this.ok(res, {
-      user,
-    });
   }
 
   async getAuthenticationData(
@@ -124,9 +140,12 @@ export class UserController extends BaseController implements IUserController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const result = await this.userService.getAuthenticationData(publicKey);
-
-    this.ok(res, result);
+    try {
+      const result = await this.userService.getAuthenticationData(publicKey);
+      this.ok(res, result);
+    } catch (error) {
+      return next(new HTTPError(500, "Failed to get authentication data", "Auth", error.stack));
+    }
   }
 
   async create(
@@ -141,7 +160,7 @@ export class UserController extends BaseController implements IUserController {
       }
       this.ok(res, result);
     } catch (error) {
-      return next(new HTTPError(500, "Something went wrong"));
+      return next(new HTTPError(500, "Failed to create a user", "Users", error.stack));
     }
   }
 

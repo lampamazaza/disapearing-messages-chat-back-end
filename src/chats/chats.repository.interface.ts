@@ -4,5 +4,4 @@ export interface IChatsRepository {
   getUserChats: (
     userPublicKey: string
   ) => Promise<UsersOnChats[] & { lastMessage: MessageModel }>;
-  getChatById: (id: number) => Promise<ChatModel | null>;
 }

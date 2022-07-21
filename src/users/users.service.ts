@@ -13,7 +13,7 @@ export class UserService implements IUserService {
     @inject(TYPES.UsersRepository) private usersRepository: IUsersRepository,
     @inject(TYPES.AuthenticationService)
     private authenticationService: IAuthenticationService
-  ) {}
+  ) { }
 
   async createUser(userToCreate: UserCreateDto): Promise<UserModel | null> {
     const userAlreadyExist = await this.usersRepository.findByAlias(
@@ -33,6 +33,10 @@ export class UserService implements IUserService {
   }
 
   async authenticate(decryptedMsg: number[], publicKey: string) {
+    const user = await this.usersRepository.find(publicKey)
+    if (user === null) {
+      throw new Error("This user doesn't exist")
+    }
     const isSuccessfullyAuthenticated =
       this.authenticationService.checkAuthenticationResult(
         decryptedMsg,
@@ -42,12 +46,16 @@ export class UserService implements IUserService {
     return {
       isSuccessfullyAuthenticated,
       user: isSuccessfullyAuthenticated
-        ? await this.usersRepository.find(publicKey)
+        ? user
         : null,
     };
   }
 
   async getAuthenticationData(userPublicKey: string): Promise<any> {
+    const user = await this.usersRepository.find(userPublicKey)
+    if (user === null) {
+      throw new Error("This user doesn't exist")
+    }
     return this.authenticationService.generateAuthenticationData(userPublicKey);
   }
 

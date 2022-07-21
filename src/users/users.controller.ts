@@ -97,6 +97,9 @@ export class UserController extends BaseController implements IUserController {
   async login({ userPublicKey }: Request, res: Response, next: NextFunction) {
     try {
       const user = await this.userService.login(userPublicKey);
+      if (!user) {
+        return next(new HTTPError(404, "This user doesn't exist"));
+      }
       this.ok(res, user);
     } catch (error) {
       return next(new HTTPError(500, "Failed to login", "Auth", error.stack));
@@ -122,6 +125,7 @@ export class UserController extends BaseController implements IUserController {
     try {
       const { isSuccessfullyAuthenticated, user } =
         await this.userService.authenticate(decryptedMsg, publicKey);
+
       if (!isSuccessfullyAuthenticated) {
         return next(new HTTPError(401, "Auth error", "login"));
       }
@@ -144,7 +148,7 @@ export class UserController extends BaseController implements IUserController {
       const result = await this.userService.getAuthenticationData(publicKey);
       this.ok(res, result);
     } catch (error) {
-      return next(new HTTPError(500, "Failed to get authentication data", "Auth", error.stack));
+      return next(new HTTPError(500, error.message || "Failed to get authentication data", "Auth", error.stack));
     }
   }
 

@@ -5,7 +5,7 @@ export interface IUserController {
   info: (req: Request, res: Response, next: NextFunction) => void;
   infoByPublicKey: (req: Request, res: Response, next: NextFunction) => void;
   authenticate: (
-    req: Request<{}, {}, { decryptedMsg: number[]; publicKey: string }>,
+    req: Request<{}, {}, { decryptedMsg: string; publicKey: string }>,
     res: Response,
     next: NextFunction
   ) => void;

@@ -13,7 +13,7 @@ export interface IUserService {
   getUserInfoByPublicKey: (publicKey: string) => Promise<UserModel | null>;
   getAuthenticationData: (publicKey: string) => Promise<any>;
   authenticate: (
-    decryptedMsg: number[],
+    decryptedMsg: string,
     publicKey: string
   ) => Promise<{
     isSuccessfullyAuthenticated: boolean;

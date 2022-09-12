@@ -118,7 +118,7 @@ export class UserController extends BaseController implements IUserController {
   async authenticate(
     {
       body: { decryptedMsg, publicKey },
-    }: Request<{}, {}, { decryptedMsg: number[]; publicKey: string }>,
+    }: Request<{}, {}, { decryptedMsg: string; publicKey: string }>,
     res: Response,
     next: NextFunction
   ): Promise<void> {
@@ -175,7 +175,7 @@ export class UserController extends BaseController implements IUserController {
   ): Promise<void> {
     const userInfo = await this.userService.getUserInfo(alias);
     if (!userInfo) {
-      return next(new HTTPError(404, "User not found"));
+      return next(new HTTPError(404, "User with this alias doesn't exist"));
     }
     this.ok(res, {
       publicKey: userInfo?.publicKey,

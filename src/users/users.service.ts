@@ -32,7 +32,7 @@ export class UserService implements IUserService {
     return newUser;
   }
 
-  async authenticate(decryptedMsg: number[], publicKey: string) {
+  async authenticate(decryptedMsg: string, publicKey: string) {
     const user = await this.usersRepository.find(publicKey)
     if (user === null) {
       throw new Error("This user doesn't exist")

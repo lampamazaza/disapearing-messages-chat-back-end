@@ -3,7 +3,6 @@ import { inject, injectable } from "inversify";
 import { IConfigService } from "../config/config.service.interface";
 import { TYPES } from "../types";
 import { MessageCreateDto } from "./dto/message-create.dto";
-import { Message } from "./message.entity";
 import { IMessagesRepository } from "./messages.repository.interface";
 import { IMessageService } from "./messages.service.interface";
 

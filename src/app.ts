@@ -34,12 +34,17 @@ export class App {
     private messageDeletionService: MessageDeletionService
   ) {
     this.app = express();
-    this.port = 5000;
+    this.port = +this.configService.get("PORT");
   }
 
   useMiddleware(): void {
-    if(this.configService.get("ENV") === "development") {
-      this.app.use(cors({ credentials: true, origin: this.configService.get("CORS_DEV_ALLOW")}));
+    if (this.configService.get("CORS_DEV_ALLOW")) {
+      this.app.use(
+        cors({
+          credentials: true,
+          origin: this.configService.get("CORS_DEV_ALLOW"),
+        })
+      );
     }
     this.app.use(json());
     const authMiddleware = new AuthMiddleware(this.configService.get("SECRET"));
@@ -63,7 +68,7 @@ export class App {
     await this.prismaService.connect();
     this.messageDeletionService.init();
     this.server = this.app.listen(this.port);
-    this.logger.log(`Server started at http://localhost:${this.port}`);
+    this.logger.log(`Server started at port ${this.port}`);
   }
 
   public close(): void {

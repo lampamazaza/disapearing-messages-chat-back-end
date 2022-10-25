@@ -82,7 +82,9 @@ export class UserController extends BaseController implements IUserController {
   ): Promise<void> {
     try {
       if (userPublicKeyToUpdate !== userPublicKey) {
-        return next(new HTTPError(403, "You can't change other people account"));
+        return next(
+          new HTTPError(403, "You can't change other people account")
+        );
       }
       const updatedUserInfo = await this.userService.updateUserInfo(
         body,
@@ -90,7 +92,9 @@ export class UserController extends BaseController implements IUserController {
       );
       this.ok(res, updatedUserInfo);
     } catch (error) {
-      return next(new HTTPError(500, "Failed to update user data", "Users", error.stack));
+      return next(
+        new HTTPError(500, "Failed to update user data", "Users", error.stack)
+      );
     }
   }
 
@@ -135,7 +139,9 @@ export class UserController extends BaseController implements IUserController {
         user,
       });
     } catch (error) {
-      return next(new HTTPError(500, "Failed to authenticate", "Auth", error.stack));
+      return next(
+        new HTTPError(500, "Failed to authenticate", "Auth", error.stack)
+      );
     }
   }
 
@@ -148,7 +154,14 @@ export class UserController extends BaseController implements IUserController {
       const result = await this.userService.getAuthenticationData(publicKey);
       this.ok(res, result);
     } catch (error) {
-      return next(new HTTPError(500, error.message || "Failed to get authentication data", "Auth", error.stack));
+      return next(
+        new HTTPError(
+          500,
+          error.message || "Failed to get authentication data",
+          "Auth",
+          error.stack
+        )
+      );
     }
   }
 
@@ -164,7 +177,9 @@ export class UserController extends BaseController implements IUserController {
       }
       this.ok(res, result);
     } catch (error) {
-      return next(new HTTPError(500, "Failed to create a user", "Users", error.stack));
+      return next(
+        new HTTPError(500, "Failed to create a user", "Users", error.stack)
+      );
     }
   }
 

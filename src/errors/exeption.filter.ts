@@ -12,17 +12,17 @@ export class ExeptionFilter implements IExeptionFilter {
 
   catch(
     err: Error | HTTPError,
-    req: Request,
+    _req: Request,
     res: Response,
-    next: NextFunction
+    _next: NextFunction
   ): void {
     if (err instanceof HTTPError) {
       this.logger.error(
-        `[${err.context}] Error ${err.statusCode}: ${err.message}`
+        `[${err.context}] Error ${err.statusCode}: ${err.message}${err.stack ? `\n${err.stack}`: ""}`
       );
       res.status(err.statusCode).send({ message: err.message });
     } else {
-      this.logger.error(`${err.message}`);
+      this.logger.error(`${err.message}\n${err.stack}`);
       res.status(500).send({ err: err.message });
     }
   }

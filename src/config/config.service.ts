@@ -1,8 +1,9 @@
 import { IConfigService } from "./config.service.interface";
-import { config, DotenvConfigOutput, DotenvParseOutput } from "dotenv";
+import { config, DotenvParseOutput } from "dotenv";
 import { inject, injectable } from "inversify";
 import { ILogger } from "../logger/logger.interface";
 import { TYPES } from "../types";
+import isAnyOfTheseKeysUndefined from "../utils/isAnyOfKeysUndefined";
 
 @injectable()
 export class ConfigService implements IConfigService {
@@ -25,8 +26,12 @@ export class ConfigService implements IConfigService {
       };
     }
 
-    if (this.config.SECRET === undefined || this.config.PORT === undefined) {
-      this.logger.error("[ConfigService] SECRET and PORT envs are missing");
+    const obligatoryEnvVars = ["SECRET", "PORT"];
+
+    if (isAnyOfTheseKeysUndefined(obligatoryEnvVars, this.config)) {
+      this.logger.error(
+        `[ConfigService] Some of these ENVS are not set: ${obligatoryEnvVars}`
+      );
       process.exit(1);
     } else {
       this.logger.log("[ConfigService] Dot Env config loaded");

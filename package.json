@@ -11,7 +11,8 @@
     "dev:inspect": "nodemon -e ts,json --exec node --inspect=localhost:9222 -r ts-node/register src/main.ts",
     "generate": "prisma generate",
     "migration": "prisma migrate dev --name init",
-    "prod": "npm run generate && npm run migration && npm run build && npm run start",
+    "make-prod-db": "prisma migrate deploy && prisma db push",
+    "prod": "npm run generate && npm run make-prod-db && npm run build && npm run start",
     "build": "tsc"
   },
   "keywords": [],

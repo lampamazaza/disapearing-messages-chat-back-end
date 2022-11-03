@@ -8,7 +8,9 @@ export const COOKIE_TOKEN_OPTIONS = {
   httpOnly: true,
   path: "/",
   secure: true,
-  // sameSite: (true ? "none" : "strict") as CookieOptions["sameSite"],
+  sameSite: (process.env.NODE_ENV !== "production"
+    ? "none"
+    : "strict") as CookieOptions["sameSite"],
 };
 
 export const DELETED_COOKIE_VAlUE = "";

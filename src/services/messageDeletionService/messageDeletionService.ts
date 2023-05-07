@@ -4,7 +4,7 @@ import { IMessagesRepository } from "../../messages/messages.repository.interfac
 import cron from "node-cron";
 import { TYPES } from "../../types";
 import "reflect-metadata";
-import { ILogger } from "logger/logger.interface";
+import { ILogger } from "../../logger/logger.interface";
 
 @injectable()
 export class MessageDeletionService implements IMessageDeletionService {

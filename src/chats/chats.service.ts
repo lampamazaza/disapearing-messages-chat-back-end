@@ -1,4 +1,4 @@
-import {  UsersOnChats } from ".prisma/client";
+import { UsersOnChats } from "../database/models";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types";
 import { IChatsRepository } from "./chats.repository.interface";

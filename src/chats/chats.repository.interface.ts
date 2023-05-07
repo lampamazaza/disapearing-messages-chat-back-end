@@ -1,4 +1,4 @@
-import { ChatModel, UsersOnChats, MessageModel } from "@prisma/client";
+import { UsersOnChats, MessageModel } from "../database/models";
 
 export interface IChatsRepository {
   getUserChats: (

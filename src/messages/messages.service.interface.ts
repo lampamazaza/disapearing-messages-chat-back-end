@@ -1,5 +1,5 @@
 import { MessageCreateDto } from "./dto/message-create.dto";
-import { MessageModel } from ".prisma/client";
+import { MessageModel } from "../database/models";
 
 export interface IMessageService {
   create: (

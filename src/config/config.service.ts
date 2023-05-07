@@ -22,11 +22,12 @@ export class ConfigService implements IConfigService {
       this.config = {
         SECRET: process.env.SECRET,
         CORS_DEV_ALLOW: process.env.CORS_DEV_ALLOW,
+        DB_PATH: process.env.DB_PATH,
         PORT: process.env.PORT,
       };
     }
 
-    const obligatoryEnvVars = ["SECRET", "PORT"];
+    const obligatoryEnvVars = ["SECRET", "PORT", "DB_PATH"];
 
     if (isAnyOfTheseKeysUndefined(obligatoryEnvVars, this.config)) {
       this.logger.error(

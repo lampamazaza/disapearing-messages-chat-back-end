@@ -9,7 +9,7 @@ export const TYPES = {
   ChatService: Symbol.for("ChatService"),
   ExeptionFilter: Symbol.for("ExeptionFilter"),
   ConfigService: Symbol.for("ConfigService"),
-  PrismaService: Symbol.for("PrismaService"),
+  SqliteService: Symbol.for("SqliteService"),
 
   MessageController: Symbol.for("MessageController"),
   MessagesRepository: Symbol.for("MessagesRepository"),

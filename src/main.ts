@@ -2,7 +2,6 @@ import { Container, ContainerModule, interfaces } from "inversify";
 import { App } from "./app";
 import { ConfigService } from "./config/config.service";
 import { IConfigService } from "./config/config.service.interface";
-import { PrismaService } from "./database/prisma.service";
 import { ExeptionFilter } from "./errors/exeption.filter";
 import { IExeptionFilter } from "./errors/exeption.filter.interface";
 import { ILogger } from "./logger/logger.interface";
@@ -29,6 +28,7 @@ import { MessagesRepository } from "./messages/messages.repository";
 import { PollingService } from "./services/pollingService/polling.service";
 import { AuthenticationService } from "./services/authenticationService/authenticationService";
 import { MessageDeletionService } from "./services/messageDeletionService/messageDeletionService";
+import { SqliteService } from "./database/sqlite.service";
 export interface IBootstrapReturn {
   appContainer: Container;
   app: App;
@@ -59,7 +59,7 @@ export const appBindings = new ContainerModule((bind: interfaces.Bind) => {
   bind<IMessagesRepository>(TYPES.MessagesRepository)
     .to(MessagesRepository)
     .inSingletonScope();
-  bind<PrismaService>(TYPES.PrismaService).to(PrismaService).inSingletonScope();
+  bind<SqliteService>(TYPES.SqliteService).to(SqliteService).inSingletonScope();
   bind<IConfigService>(TYPES.ConfigService)
     .to(ConfigService)
     .inSingletonScope();

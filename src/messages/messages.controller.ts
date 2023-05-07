@@ -10,13 +10,14 @@ import { IConfigService } from "../config/config.service.interface";
 import { IMessageService } from "./messages.service.interface";
 import { ValidateMiddleware } from "../common/validate.middleware";
 import { HTTPError } from "../errors/http-error.class";
-import { IPollingService } from "services/pollingService/polling.interface";
+import { IPollingService } from "../services/pollingService/polling.interface";
 import { AuthGuard } from "../common/auth.guard";
 
 @injectable()
 export class MessageController
   extends BaseController
-  implements IMessageController {
+  implements IMessageController
+{
   constructor(
     @inject(TYPES.ILogger) private loggerService: ILogger,
     @inject(TYPES.MessageService) private messagesService: IMessageService,
@@ -63,7 +64,14 @@ export class MessageController
 
       this.ok(res, messages);
     } catch (error) {
-      return next(new HTTPError(500, "Failed to get messages in a chat", "Messages", error.stack));
+      return next(
+        new HTTPError(
+          500,
+          "Failed to get messages in a chat",
+          "Messages",
+          error.stack
+        )
+      );
     }
   }
 
@@ -89,9 +97,10 @@ export class MessageController
       );
       this.ok(res, message);
     } catch (error) {
-      return next(new HTTPError(500, "Failed to send a message", "Messages", error.stack));
+      return next(
+        new HTTPError(500, "Failed to send a message", "Messages", error.stack)
+      );
     }
-
   }
 
   async subscribeForMessages(req: Request, res: Response, next: NextFunction) {
@@ -104,7 +113,14 @@ export class MessageController
         () => res.status(408).send()
       );
     } catch (error) {
-      return next(new HTTPError(500, "Failed to subscribe for messages update", "Messages", error.stack));
+      return next(
+        new HTTPError(
+          500,
+          "Failed to subscribe for messages update",
+          "Messages",
+          error.stack
+        )
+      );
     }
   }
 }

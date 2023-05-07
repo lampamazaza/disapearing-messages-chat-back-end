@@ -11,7 +11,7 @@ import { IExeptionFilter } from "./errors/exeption.filter.interface";
 import { UserController } from "./users/users.controller";
 import { ChatController } from "./chats/chats.controller";
 import { MessageController } from "./messages/messages.controller";
-import { PrismaService } from "./database/prisma.service";
+import { SqliteService } from "./database/sqlite.service";
 import { MessageDeletionService } from "./services/messageDeletionService/messageDeletionService";
 import { AuthMiddleware } from "./common/auth.middleware";
 
@@ -29,7 +29,7 @@ export class App {
     private messageController: MessageController,
     @inject(TYPES.ExeptionFilter) private exeptionFilter: IExeptionFilter,
     @inject(TYPES.ConfigService) private configService: IConfigService,
-    @inject(TYPES.PrismaService) private prismaService: PrismaService,
+    @inject(TYPES.SqliteService) private sqliteService: SqliteService,
     @inject(TYPES.MessageDeletionService)
     private messageDeletionService: MessageDeletionService
   ) {
@@ -65,7 +65,7 @@ export class App {
     this.useMiddleware();
     this.useRoutes();
     this.useExeptionFilters();
-    await this.prismaService.connect();
+    await this.sqliteService.connect();
     this.messageDeletionService.init();
     this.server = this.app.listen(this.port);
     this.logger.log(`Server started at port ${this.port}`);

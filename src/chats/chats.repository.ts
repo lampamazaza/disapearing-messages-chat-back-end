@@ -1,51 +1,38 @@
-import { UsersOnChats, ChatModel, MessageModel } from ".prisma/client";
+import { UsersOnChats, MessageModel } from "../database/models";
 import { inject, injectable } from "inversify";
-import { PrismaService } from "../database/prisma.service";
+import { SqliteService } from "../database/sqlite.service";
 import { TYPES } from "../types";
 import { IChatsRepository } from "./chats.repository.interface";
 
 @injectable()
 export class ChatsRepository implements IChatsRepository {
   constructor(
-    @inject(TYPES.PrismaService) private prismaService: PrismaService
+    @inject(TYPES.SqliteService) private sqliteService: SqliteService
   ) {}
 
   async getUserChats(
     userPublicKey: string
   ): Promise<UsersOnChats[] & { lastMessage: MessageModel }> {
     let result;
-    let chats = await this.prismaService.client.usersOnChats.findMany({
-      where: {
-        userPublicKey,
-      },
-      select: {
-        chatId: true,
-      },
-    });
+    let chats = await this.sqliteService.client.all(
+      "SELECT chatId FROM usersOnChats WHERE userPublicKey = ?",
+      userPublicKey
+    );
 
     result = Promise.all(
       chats.map(async (item) => {
         const [user, lastMessage] = await Promise.all([
-          this.prismaService.client.usersOnChats.findFirst({
-            where: {
-              chatId: item.chatId,
-              AND: {
-                userPublicKey: {
-                  not: userPublicKey,
-                },
-              },
-            },
-            include: {
-              user: true,
-            },
-          }),
-          this.prismaService.client.messageModel.findFirst({
-            where: { chatId: item.chatId },
-            orderBy: { sentAt: "desc" },
-          }),
+          this.sqliteService.client.get(
+            "SELECT users.id, users.publicKey, users.name , users.alias FROM usersOnChats JOIN users ON usersOnChats.userPublicKey = users.publicKey  WHERE userPublicKey  !=  ?",
+            userPublicKey
+          ),
+          this.sqliteService.client.get(
+            "SELECT * FROM messages WHERE chatId = ? ORDER BY sentAt DESC  LIMIT 1",
+            item.chatId
+          ),
         ]);
-        item["user"] = user.user;
-        item["publicKey"] = user.user.publicKey;
+        item["user"] = user;
+        item["publicKey"] = user.publicKey;
         item["lastMessage"] = lastMessage;
         return item;
       })

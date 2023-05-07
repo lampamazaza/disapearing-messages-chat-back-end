@@ -1,4 +1,4 @@
-import { MessageModel } from ".prisma/client";
+import { MessageModel } from "../database/models";
 import { inject, injectable } from "inversify";
 import { IConfigService } from "../config/config.service.interface";
 import { TYPES } from "../types";

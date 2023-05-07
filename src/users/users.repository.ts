@@ -1,50 +1,41 @@
-import { UserModel } from ".prisma/client";
+import { UserModel } from "../database/models";
 import { inject, injectable } from "inversify";
-import { PrismaService } from "../database/prisma.service";
 import { TYPES } from "../types";
 import { User } from "./user.entity";
 import { IUsersRepository } from "./users.repository.interface";
+import { SqliteService } from "../database/sqlite.service";
 
 @injectable()
 export class UsersRepository implements IUsersRepository {
   constructor(
-    @inject(TYPES.PrismaService) private prismaService: PrismaService
+    @inject(TYPES.SqliteService) private sqliteService: SqliteService
   ) {}
-
   async create({ publicKey, alias, name }: User): Promise<UserModel> {
-    return this.prismaService.client.userModel.create({
-      data: {
-        publicKey,
-        alias,
-        name,
-      },
-    });
+    return this.sqliteService.client.get(
+      `INSERT INTO users
+  (publicKey, name, alias)
+  VALUES (?, ?, ?)  RETURNING id, publicKey, name, alias`,
+      [publicKey, name, alias]
+    );
   }
 
   async find(publicKey: string): Promise<UserModel | null> {
-    return this.prismaService.client.userModel.findFirst({
-      where: {
-        publicKey,
-      },
-    });
+    return this.sqliteService.client.get(
+      "SELECT * FROM users WHERE publicKey = ?",
+      publicKey
+    );
   }
   async findByAlias(alias: string): Promise<UserModel | null> {
-    return this.prismaService.client.userModel.findFirst({
-      where: {
-        alias,
-      },
-    });
+    return this.sqliteService.client.get(
+      "SELECT * FROM users WHERE alias = ?",
+      alias
+    );
   }
 
   async update(user: User): Promise<UserModel> {
-    return this.prismaService.client.userModel.update({
-      where: {
-        publicKey: user.publicKey,
-      },
-      data: {
-        name: user.name,
-        alias: user.alias,
-      },
-    });
+    return this.sqliteService.client.get(
+      "UPDATE users SET name = ? WHERE publicKey = ? RETURNING id, publicKey, name, alias",
+      [user.name, user.publicKey]
+    );
   }
 }

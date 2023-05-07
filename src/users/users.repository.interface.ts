@@ -1,4 +1,4 @@
-import { UserModel } from "@prisma/client";
+import { UserModel } from "../database/models";
 import { User } from "./user.entity";
 export interface IUsersRepository {
   create: (user: User) => Promise<UserModel>;

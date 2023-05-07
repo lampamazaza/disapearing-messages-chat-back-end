@@ -1,6 +1,5 @@
 import { injectable } from "inversify";
 import { IPollingService } from "./polling.interface";
-import { Response } from "express";
 import "reflect-metadata";
 
 @injectable()
@@ -27,7 +26,7 @@ export class PollingService implements IPollingService {
     // if already exists
     if (this.subscribersStorage[id]) {
       clearInterval(this.subscribersStorage[id].timeoutId);
-      this.subscribersStorage[id].resolver()
+      this.subscribersStorage[id].resolver();
       delete this.subscribersStorage[id];
     }
 

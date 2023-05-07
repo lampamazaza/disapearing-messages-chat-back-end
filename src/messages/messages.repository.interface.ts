@@ -1,4 +1,4 @@
-import { MessageModel } from "prisma/prisma-client";
+import { MessageModel } from "../database/models";
 import { Message } from "./message.entity";
 export interface IMessagesRepository {
   create: (message: Message) => Promise<MessageModel>;

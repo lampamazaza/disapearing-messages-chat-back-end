@@ -1,11 +1,11 @@
-import { UserModel } from ".prisma/client";
+import { UserModel } from "../database/models";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types";
 import { UserCreateDto } from "./dto/user-create.dto";
 import { User } from "./user.entity";
 import { IUsersRepository } from "./users.repository.interface";
 import { IUserService } from "./users.service.interface";
-import { IAuthenticationService } from "services/authenticationService/authentication.interface";
+import { IAuthenticationService } from "../services/authenticationService/authentication.interface";
 
 @injectable()
 export class UserService implements IUserService {
@@ -13,7 +13,7 @@ export class UserService implements IUserService {
     @inject(TYPES.UsersRepository) private usersRepository: IUsersRepository,
     @inject(TYPES.AuthenticationService)
     private authenticationService: IAuthenticationService
-  ) { }
+  ) {}
 
   async createUser(userToCreate: UserCreateDto): Promise<UserModel | null> {
     const userAlreadyExist = await this.usersRepository.findByAlias(
@@ -33,9 +33,9 @@ export class UserService implements IUserService {
   }
 
   async authenticate(decryptedMsg: string, publicKey: string) {
-    const user = await this.usersRepository.find(publicKey)
-    if (user === null) {
-      throw new Error("This user doesn't exist")
+    const user = await this.usersRepository.find(publicKey);
+    if (!user) {
+      throw new Error("This user doesn't exist");
     }
     const isSuccessfullyAuthenticated =
       this.authenticationService.checkAuthenticationResult(
@@ -45,16 +45,14 @@ export class UserService implements IUserService {
 
     return {
       isSuccessfullyAuthenticated,
-      user: isSuccessfullyAuthenticated
-        ? user
-        : null,
+      user: isSuccessfullyAuthenticated ? user : null,
     };
   }
 
   async getAuthenticationData(userPublicKey: string): Promise<any> {
-    const user = await this.usersRepository.find(userPublicKey)
-    if (user === null) {
-      throw new Error("This user doesn't exist")
+    const user = await this.usersRepository.find(userPublicKey);
+    if (!user) {
+      throw new Error("This user doesn't exist");
     }
     return this.authenticationService.generateAuthenticationData(userPublicKey);
   }

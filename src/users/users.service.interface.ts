@@ -1,4 +1,4 @@
-import { UserModel } from "@prisma/client";
+import { UserModel } from "../database/models";
 import { UserCreateDto } from "./dto/user-create.dto";
 import { User } from "./user.entity";
 

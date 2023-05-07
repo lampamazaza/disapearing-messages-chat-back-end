@@ -1,15 +1,15 @@
 import { Message } from "./message.entity";
-import { MessageModel } from "prisma/prisma-client";
+import { MessageModel } from "../database/models";
 import { inject, injectable } from "inversify";
-import { PrismaService } from "../database/prisma.service";
 import { TYPES } from "../types";
 import { IMessagesRepository } from "./messages.repository.interface";
 import generateHash from "../utils/generateHash";
+import { SqliteService } from "../database/sqlite.service";
 
 @injectable()
 export class MessagesRepository implements IMessagesRepository {
   constructor(
-    @inject(TYPES.PrismaService) private prismaService: PrismaService
+    @inject(TYPES.SqliteService) private sqliteService: SqliteService
   ) {}
 
   async create({
@@ -22,92 +22,79 @@ export class MessagesRepository implements IMessagesRepository {
     let chatExists = true;
     let hash = "";
     if (chatId) {
-      chat = await this.prismaService.client.chatModel.findFirst({
-        where: { id: chatId },
-      });
+      chat = await this.sqliteService.client.get(
+        "SELECT * FROM chats WHERE id = ?",
+        chatId
+      );
     }
 
-    if (chat === null) {
+    if (!chat) {
       hash = await generateHash(from, to);
-      chat = await this.prismaService.client.chatModel.findFirst({
-        where: { chatHash: hash },
-      });
+      chat = await this.sqliteService.client.get(
+        "SELECT * FROM chats WHERE chatHash = ?",
+        hash
+      );
     }
 
-    if (chat === null) {
+    if (!chat) {
       chatExists = false;
     }
 
     if (!chatExists) {
-      chat = await this.prismaService.client.chatModel.create({
-        data: {
-          chatHash: hash,
-        },
-      });
+      chat = await this.sqliteService.client.get(
+        "INSERT INTO chats (chatHash) VALUES (?) RETURNING *;",
+        hash
+      );
 
       await Promise.all([
-        this.prismaService.client.usersOnChats.create({
-          data: {
-            chatId: chat.id,
-            userPublicKey: from,
-          },
-        }),
-        this.prismaService.client.usersOnChats.create({
-          data: {
-            chatId: chat.id,
-            userPublicKey: to,
-          },
-        }),
+        this.sqliteService.client.run(
+          "INSERT INTO usersOnChats (chatId, userPublicKey) VALUES (?,?);",
+          [chat.id, from]
+        ),
+        this.sqliteService.client.run(
+          "INSERT INTO usersOnChats (chatId, userPublicKey) VALUES (?,?);",
+          [chat.id, to]
+        ),
       ]);
     }
 
-    return await this.prismaService.client.messageModel.create({
-      data: {
-        sender: from,
-        text: message,
-        chat: {
-          connect: {
-            id: chat.id,
-          },
-        },
-      },
-    });
+    return this.sqliteService.client.get(
+      "INSERT INTO messages (sender, text, chatId) VALUES (?,?,?) RETURNING *;",
+      [from, message, chat.id]
+    );
   }
 
   async getMessagesByCorrespondentPublicKey(
     userPublicKey: string,
     publicKey: string
   ): Promise<MessageModel[]> {
-    const user = await this.prismaService.client.userModel.findFirst({
-      where: {
-        publicKey,
-      },
-    });
+    const user = await this.sqliteService.client.get(
+      "SELECT * FROM users WHERE publicKey = ?",
+      publicKey
+    );
+
     if (!user) return null;
     const chatHash = await generateHash(userPublicKey, user.publicKey);
 
-    const chat = await this.prismaService.client.chatModel.findFirst({
-      where: {
-        chatHash,
-      },
-    });
+    const chat = await this.sqliteService.client.get(
+      "SELECT * FROM chats WHERE chatHash = ?",
+      chatHash
+    );
 
-    if (chat === null) return [];
+    if (!chat) return [];
 
-    return this.prismaService.client.messageModel.findMany({
-      where: { chatId: chat.id },
-      orderBy: { sentAt: "asc" },
-    });
+    return this.sqliteService.client.all(
+      "SELECT * FROM messages WHERE chatId = ? ORDER BY sentAt ASC",
+      chat.id
+    );
   }
 
   async wipeAllMessagesOlderThanTwoDays() {
-    return await this.prismaService.client.messageModel.deleteMany({
-      where: {
-        sentAt: {
-          //172800000 - two days in ms
-          lte: new Date(new Date().getTime() - 172800000),
-        },
-      },
-    });
+    const twoDaysBefore = new Date(new Date().getTime() - 172800000);
+    const { changes } = await this.sqliteService.client.run(
+      "DELETE FROM messages WHERE sentAt < ?",
+      twoDaysBefore.toISOString()
+    );
+    return { count: changes };
   }
 }

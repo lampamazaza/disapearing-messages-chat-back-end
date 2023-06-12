@@ -12,9 +12,8 @@ export function getCreateUsersOnChats() {
     "userPublicKey" TEXT NOT NULL,
     "chatId" INTEGER NOT NULL,
 
-    PRIMARY KEY ("userPublicKey", "chatId"),
     CONSTRAINT "usersOnChats_userPublicKey_fkey" FOREIGN KEY ("userPublicKey") REFERENCES "users" ("publicKey") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "usersOnChats_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "chats" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
-)
-`;
+    )
+    `;
 }

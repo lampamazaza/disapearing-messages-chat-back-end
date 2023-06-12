@@ -18,4 +18,5 @@ export const TYPES = {
   PollingSerivce: Symbol.for("PollingService"),
   AuthenticationService: Symbol.for("AuthenticationService"),
   MessageDeletionService: Symbol.for("MessageDeletionService"),
+  WebSocketService: Symbol.for("WebSocketService"),
 };

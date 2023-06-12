@@ -14,6 +14,7 @@ import { MessageController } from "./messages/messages.controller";
 import { SqliteService } from "./database/sqlite.service";
 import { MessageDeletionService } from "./services/messageDeletionService/messageDeletionService";
 import { AuthMiddleware } from "./common/auth.middleware";
+import { WebSocketService } from "./services/webSocketService/webSocket.service";
 
 @injectable()
 export class App {
@@ -30,6 +31,7 @@ export class App {
     @inject(TYPES.ExeptionFilter) private exeptionFilter: IExeptionFilter,
     @inject(TYPES.ConfigService) private configService: IConfigService,
     @inject(TYPES.SqliteService) private sqliteService: SqliteService,
+    @inject(TYPES.WebSocketService) private webSocketService: WebSocketService,
     @inject(TYPES.MessageDeletionService)
     private messageDeletionService: MessageDeletionService
   ) {
@@ -68,6 +70,7 @@ export class App {
     await this.sqliteService.connect();
     this.messageDeletionService.init();
     this.server = this.app.listen(this.port);
+    this.webSocketService.init(this.server);
     this.logger.log(`Server started at port ${this.port}`);
   }
 

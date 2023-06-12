@@ -1,5 +1,5 @@
 import { Message } from "./message.entity";
-import { MessageModel } from "../database/models";
+import { CHAT_TYPE, MessageModel } from "../database/models";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types";
 import { IMessagesRepository } from "./messages.repository.interface";
@@ -42,8 +42,8 @@ export class MessagesRepository implements IMessagesRepository {
 
     if (!chatExists) {
       chat = await this.sqliteService.client.get(
-        "INSERT INTO chats (chatHash) VALUES (?) RETURNING *;",
-        hash
+        "INSERT INTO chats (chatHash,type) VALUES (?,?) RETURNING *;",
+        [hash, CHAT_TYPE.DIALOG]
       );
 
       await Promise.all([

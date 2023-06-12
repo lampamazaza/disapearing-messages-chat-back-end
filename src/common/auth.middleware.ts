@@ -5,15 +5,9 @@ import {
   COOKIE_TOKEN_NAME,
   DELETED_COOKIE_VAlUE,
   COOKIE_TOKEN_OPTIONS,
-  TOKEN_LENGTH,
 } from "../users/constants";
+import getToken from "../utils/getToken";
 
-function getToken(cookies: string) {
-  const delimeter = `${COOKIE_TOKEN_NAME}=`;
-  const delimeterLength = delimeter.length;
-  const start = cookies.search(`${COOKIE_TOKEN_NAME}=`) + delimeterLength;
-  return cookies.slice(start, start + TOKEN_LENGTH);
-}
 export class AuthMiddleware implements IMiddleware {
   constructor(private secret: string) {}
 

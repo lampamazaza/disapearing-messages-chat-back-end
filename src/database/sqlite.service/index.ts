@@ -8,7 +8,6 @@ import { getCreateTable, getCreateUsersOnChats } from "./users";
 import { createMessagesTable } from "./messages";
 import { getCreateChats } from "./chats";
 
-let ke = null;
 @injectable()
 export class SqliteService {
   client: any;

@@ -15,7 +15,7 @@ export class ChatsRepository implements IChatsRepository {
   ): Promise<UsersOnChats[] & { lastMessage: MessageModel }> {
     let result;
     let chats = await this.sqliteService.client.all(
-      "SELECT chatId FROM usersOnChats WHERE userPublicKey = ?",
+      "SELECT chatId, userPublicKey FROM usersOnChats WHERE userPublicKey = ?",
       userPublicKey
     );
 
@@ -23,8 +23,8 @@ export class ChatsRepository implements IChatsRepository {
       chats.map(async (item) => {
         const [user, lastMessage] = await Promise.all([
           this.sqliteService.client.get(
-            "SELECT users.id, users.publicKey, users.name , users.alias FROM usersOnChats JOIN users ON usersOnChats.userPublicKey = users.publicKey  WHERE userPublicKey  !=  ?",
-            userPublicKey
+            "SELECT users.id, users.publicKey, users.name , users.alias FROM usersOnChats JOIN users ON usersOnChats.userPublicKey = users.publicKey  WHERE chatId = ? and userPublicKey  !=  ?",
+            [item.chatId, userPublicKey]
           ),
           this.sqliteService.client.get(
             "SELECT * FROM messages WHERE chatId = ? ORDER BY sentAt DESC  LIMIT 1",

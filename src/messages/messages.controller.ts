@@ -12,6 +12,7 @@ import { ValidateMiddleware } from "../common/validate.middleware";
 import { HTTPError } from "../errors/http-error.class";
 import { IPollingService } from "../services/pollingService/polling.interface";
 import { AuthGuard } from "../common/auth.guard";
+import { IWebSocketService } from "services/webSocketService/webSocket.interface";
 
 @injectable()
 export class MessageController
@@ -22,7 +23,8 @@ export class MessageController
     @inject(TYPES.ILogger) private loggerService: ILogger,
     @inject(TYPES.MessageService) private messagesService: IMessageService,
     @inject(TYPES.ConfigService) private configService: IConfigService,
-    @inject(TYPES.PollingSerivce) private pollingService: IPollingService
+    @inject(TYPES.PollingSerivce) private pollingService: IPollingService,
+    @inject(TYPES.WebSocketService) private websocketService: IWebSocketService
   ) {
     super(loggerService);
     this.bindRoutes([
@@ -41,12 +43,12 @@ export class MessageController
         func: this.getMessagesByChat,
         middlewares: [new AuthGuard()],
       },
-      {
-        path: "/subscribe",
-        method: "post",
-        func: this.subscribeForMessages,
-        middlewares: [new AuthGuard()],
-      },
+      // {
+      //   path: "/subscribe",
+      //   method: "post",
+      //   func: this.subscribeForMessages,
+      //   middlewares: [new AuthGuard()],
+      // },
     ]);
   }
 
@@ -83,18 +85,19 @@ export class MessageController
     try {
       const message = await this.messagesService.create(body, userPublicKey);
       const messageTo = body.toPublicKey;
-      this.pollingService.publish(
-        messageTo,
-        { [userPublicKey]: [message] },
-        (oldData) => {
-          return {
-            ...oldData,
-            ...{
-              [message.sender]: [...oldData[message.sender], ...[message]],
-            },
-          };
-        }
-      );
+      this.websocketService.publishPrivateMessage(messageTo, message);
+      // this.pollingService.publish(
+      //   messageTo,
+      //   { [userPublicKey]: [message] },
+      //   (oldData) => {
+      //     return {
+      //       ...oldData,
+      //       ...{
+      //         [message.sender]: [...oldData[message.sender], ...[message]],
+      //       },
+      //     };
+      //   }
+      // );
       this.ok(res, message);
     } catch (error) {
       return next(
@@ -103,24 +106,24 @@ export class MessageController
     }
   }
 
-  async subscribeForMessages(req: Request, res: Response, next: NextFunction) {
-    try {
-      req.setTimeout(120 * 1000);
+  // async subscribeForMessages(req: Request, res: Response, next: NextFunction) {
+  //   try {
+  //     req.setTimeout(120 * 1000);
 
-      this.pollingService.subscribe(
-        req.userPublicKey,
-        (payload: any) => this.ok(res, payload),
-        () => res.status(408).send()
-      );
-    } catch (error) {
-      return next(
-        new HTTPError(
-          500,
-          "Failed to subscribe for messages update",
-          "Messages",
-          error.stack
-        )
-      );
-    }
-  }
+  //     this.pollingService.subscribe(
+  //       req.userPublicKey,
+  //       (payload: any) => this.ok(res, payload),
+  //       () => res.status(408).send()
+  //     );
+  //   } catch (error) {
+  //     return next(
+  //       new HTTPError(
+  //         500,
+  //         "Failed to subscribe for messages update",
+  //         "Messages",
+  //         error.stack
+  //       )
+  //     );
+  //   }
+  // }
 }

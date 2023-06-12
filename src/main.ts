@@ -26,6 +26,7 @@ import { MessageService } from "./messages/messages.service";
 import { IMessagesRepository } from "./messages/messages.repository.interface";
 import { MessagesRepository } from "./messages/messages.repository";
 import { PollingService } from "./services/pollingService/polling.service";
+import { WebSocketService } from "./services/webSocketService/webSocket.service";
 import { AuthenticationService } from "./services/authenticationService/authenticationService";
 import { MessageDeletionService } from "./services/messageDeletionService/messageDeletionService";
 import { SqliteService } from "./database/sqlite.service";
@@ -38,6 +39,9 @@ export const appBindings = new ContainerModule((bind: interfaces.Bind) => {
   bind<ILogger>(TYPES.ILogger).to(LoggerService).inSingletonScope();
   bind<PollingService>(TYPES.PollingSerivce)
     .to(PollingService)
+    .inSingletonScope();
+  bind<WebSocketService>(TYPES.WebSocketService)
+    .to(WebSocketService)
     .inSingletonScope();
   bind<MessageDeletionService>(TYPES.MessageDeletionService)
     .to(MessageDeletionService)

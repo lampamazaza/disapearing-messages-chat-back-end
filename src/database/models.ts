@@ -16,7 +16,13 @@ export type UserModel = {
 export type ChatModel = {
   id: number;
   chatHash: string;
+  type: CHAT_TYPE;
 };
+
+export enum CHAT_TYPE {
+  DIALOG,
+  GROUP_CHAT,
+}
 
 /**
  * Model UsersOnChats
